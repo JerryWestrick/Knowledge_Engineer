@@ -3,6 +3,7 @@ import os
 
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
+from unidiff import PatchSet, UnidiffParseError
 
 from .OpenAI_API_Costs import OpenAI_API_Costs
 from .db import DB
@@ -124,6 +125,45 @@ class AI:
                                     })
             return result
 
+    async def patch(self, patch_commands: str, process_name: str) -> dict:
+
+        lines = patch_commands.splitlines(keepends=True)
+        self.log.info(f"Patching {lines}")
+        try:
+            patch_set = PatchSet(lines)
+        except UnidiffParseError as err:
+            self.log.error(f"Patch Parse Error: {str(err)}")
+            self.log.info(f"Patch Set: {lines}")
+            result = await succeed({'role': 'function', 'name': 'patch', 'content': f"Patch Parse Error: {str(err)}"})
+            # Save patch file...
+            with open("patch_file.patch", "w") as file:
+                file.write(patch_commands)
+            return result
+
+        for patched_file in patch_set:
+            file_path = patched_file.path
+            # Assuming the file to patch is in the current working directory or a subdirectory
+            # This may need adjustment depending on your directory structure and patch file format
+            if os.path.exists(file_path):
+                src_lines = self.memory.read(file_path, process_name=process_name).splitlines(keepends=False)
+
+                for hunk in patched_file:
+                    # Apply hunk changes
+                    for line in hunk:
+                        if line.is_added:
+                            src_lines.insert(line.target_line_no - 1, line.value)
+                        elif line.is_removed:
+                            assert src_lines[line.source_line_no - 1].rstrip('\n') == line.value[1:]
+                            src_lines.pop(line.source_line_no - 1)
+
+                # Write the patched content back to the file
+                self.memory[file_path] = '\n'.join(src_lines)
+                result = await succeed({'role': 'function', 'name': 'patch', 'content': f'file {file_path} patched'})
+            else:
+                result = await succeed({'role': 'function', 'name': 'patch', 'content': f'file {file_path} not found'})
+        return result
+
+
     functions = [
         {
             "name": "read_file",
@@ -157,35 +197,51 @@ class AI:
                 "required": ["name", "contents"],
             },
         },
+        # {
+        #     "name": "replace",
+        #     "description": "In the file named name,"
+        #                    "search for text 'old_code', "
+        #                    "and replace it with 'new_code'",
+        #     "parameters": {
+        #         "type": "object",
+        #         "properties": {
+        #             "name": {
+        #                 "type": "string",
+        #                 "description": "The name of the file to be modified",
+        #             },
+        #             "old_code": {
+        #                 "type": "string",
+        #                 "description": "the lines of code of the old function definition",
+        #             },
+        #             "new_code": {
+        #                 "type": "string",
+        #                 "description": "the lines of code of the new function definition",
+        #             },
+        #         },
+        #         "required": ["name", "old_code", "new_code"],
+        #     },
+        # },
         {
-            "name": "replace",
-            "description": "In the file named name,"
-                           "search for text 'old_code', "
-                           "and replace it with 'new_code'",
+            "name": "patch",
+            "description": "Use linux patch command to change the contents of a file",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "name": {
+                    "patch_commands": {
                         "type": "string",
-                        "description": "The name of the file to be modified",
-                    },
-                    "old_code": {
-                        "type": "string",
-                        "description": "the lines of code of the old function definition",
-                    },
-                    "new_code": {
-                        "type": "string",
-                        "description": "the lines of code of the new function definition",
+                        "description": "patch to be applied...",
                     },
                 },
-                "required": ["name", "old_code", "new_code"],
+                "required": ["patch_commands"],
             },
         }
+
     ]
     available_functions = {
         "read_file": read_file,
         "write_file": write_file,
-        "replace": replace,
+        # "replace": replace,
+        "patch": patch,
     }
 
     async def generate(self, step, user_messages: list[dict[str, str]], process_name: str):

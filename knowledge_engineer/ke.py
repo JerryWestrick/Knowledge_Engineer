@@ -137,7 +137,8 @@ async def execute_process(process_name: str):
         sname = dirs[-1]
         pname = '/'.join(dirs[:-2])
         step = Step.from_file(pname, sname)
-        log.info(f"Execute {process_name}({step_no}): {step.name} ")
+
+        log.info(f"Execute {process_name}({step_no}): {step.name} (a {type(step).__name__}) ")
         await step.run(process_name)
         for k, v in step.ai.e_stats.items():
             e_stats[k] = e_stats.get(k, 0.0) + v

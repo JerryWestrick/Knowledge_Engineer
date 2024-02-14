@@ -67,11 +67,20 @@ class Logger:
         if 'function_call' in msg.keys():
             arg_str = msg['function_call']['arguments']
             args = json.loads(arg_str)
-            fn = f"[deep_sky_blue1]{msg['function_call']['name']:>14}[/]"
-            if fn == 'read_file':
+            func_name = msg['function_call']['name']
+            fn = f"[deep_sky_blue1]{func_name:>14}[/]"
+            if func_name == 'read_file':
                 self.p(f"{self.ts()}{head}{fn} ({args['name']})")
+            elif func_name == 'write_file':
+                self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]")
+            elif func_name == 'replace':
+                self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]")
+            elif func_name == 'patch':
+                lines = args['patch_commands'].split('\n')
+                self.p(f"{self.ts()}{head}{fn} ({lines[0]}, ...)[green]{lines[:2]}[/]")
             else:
                 self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]")
+
         else:
             self.p(f"{self.ts()}{head}[deep_sky_blue1]{'AI message':>14}[/] [green]{content}[/]")
 
