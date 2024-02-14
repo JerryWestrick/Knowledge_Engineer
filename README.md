@@ -26,7 +26,7 @@ All the memory requirements of a process are stored in a single directory.  This
 contents should be:
 
     KE_PROC_DIR_PROMPTS='Prompts'
-    KE_PROC_DIR_STEPS='Process'
+    KE_PROC_DIR_STEPS='Steps'
     KE_PROC_DIR_REQUIREMENTS='Requirements'
     OPENAI_API_KEY=<Your Open API key>
 
