@@ -20,3 +20,14 @@ Done: Allow '*' wild card in step name
 Done: Add a list of 'Models' that can be used in .kepf files
 
 Todo: Add routine to update OpenAI_API_Costs.py
+
+Done: Test the following approach:
+      1- Have LLM generate a prompt and place it in Planning,
+      2- use the Prompt in subsequent step.
+
+Todo: The file create_new_process.py, creates the example process structure.
+      But the code in the prompts needs to be updated by hand.
+      A command "Make Default" is required that saves the structure and contents of a proces,
+      To be used in future '-create' command.  This will simplify development.
+
+Todo: add syntax for .llm and .clear lines
