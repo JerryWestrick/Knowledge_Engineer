@@ -87,13 +87,12 @@ def main():
         return
 
     if args.models:
-        log.info(f"List of all Models:")
-        log.info(f"    {'Generic':15} {'Model':25} {'Context Size'}")
-        log.info(f"    {'-' * 15} {'-'*25} {'-'*15}")
+        log.info(f" {'Generic':15} {'Model':25} {'Max Token'}")
+        log.info(f" {'-' * 15} {'-'*25} {'-'*10}")
 
         for k, v in OpenAI_API_Costs.items():
             model = '"' + v['model'] + '"'
-            log.info(f"    {v['generic']:15} { model :25} {v['context']:,}")
+            log.info(f" {v['generic']:15} { model :25} {v['context']:>10,}")
         return
 
     asyncio.run(run_ke(args))
