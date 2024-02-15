@@ -8,16 +8,16 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from knowledge_engineer.OpenAI_API_Costs import OpenAI_API_Costs
 from knowledge_engineer.create_new_process import create_new_proc
 from knowledge_engineer.db import DB
-from knowledge_engineer.ai import AI
 from knowledge_engineer.logger import Logger
 from knowledge_engineer.step import Step
-import shutil
 import os
 
 log = Logger(namespace="ke", debug=True)
 memory = DB()
+
 
 async def execute_process(process_name: str):
     log.info(f"Begin Execution of Process {process_name}")
@@ -76,6 +76,7 @@ def main():
     parser.add_argument("-log", metavar="log", type=str, help="Log to the specified file")
     parser.add_argument("-create", metavar="create", type=str, help="Create a process with given name")
     parser.add_argument("-list", action='store_true', help="List Steps in Process")
+    parser.add_argument("-models", action='store_true', help="List all accepted Models")
     parser.add_argument("-execute", action='store_true', help="Execute Process")
 
     # Parse the arguments
@@ -83,6 +84,16 @@ def main():
     # main(args)
     if args.create:
         create_new_proc(args.create)
+        return
+
+    if args.models:
+        log.info(f"List of all Models:")
+        log.info(f"    {'Generic':15} {'Model':25} {'Context Size'}")
+        log.info(f"    {'-' * 15} {'-'*25} {'-'*15}")
+
+        for k, v in OpenAI_API_Costs.items():
+            model = '"' + v['model'] + '"'
+            log.info(f"    {v['generic']:15} { model :25} {v['context']:,}")
         return
 
     asyncio.run(run_ke(args))

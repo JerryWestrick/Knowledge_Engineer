@@ -5,7 +5,7 @@ from knowledge_engineer.logger import Logger
 New_Process_Prompts: dict[str, str] = {
     # =======================================
     '1- Make Requirements.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": 50000
+        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
 .clear "Code/*", "Planning/*", "Logs/*"
 .include Requirements/Actor.kepf
 .user
@@ -19,7 +19,7 @@ re-write entire requirements to 'Planning/Requirements.md' using the function 'w
 
     # ==========================================
     '2- Make Implementation Plan.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": 50000
+        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
 .include Requirements/Actor.kepf
 .user
 Read the requirements from file 'Planning/Requirements.md'.
@@ -33,7 +33,7 @@ write any missing or additional routines or comments to file 'Planning/Implement
 
     # ==========================================
     '3- Implement Snake Program.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": 50000
+        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
 .clear "Code/*"
 .system
 You are a Python 3 programmer.
@@ -56,7 +56,7 @@ Go through file 'Code/Snake.py', look for any functions called that are not impl
 
     # ==========================================
     '4- Review Implementation.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": 50000
+        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
 .system
 You are a Python 3 programmer.
 .user

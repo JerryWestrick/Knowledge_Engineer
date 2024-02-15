@@ -16,3 +16,7 @@ Done: the Create Procedure Routine needs to be updated to new syntax...
 Todo: New Documentation is Required.
 
 Done: Allow '*' wild card in step name
+
+Done: Add a list of 'Models' that can be used in .kepf files
+
+Todo: Add routine to update OpenAI_API_Costs.py
