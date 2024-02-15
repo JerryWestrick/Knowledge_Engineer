@@ -56,14 +56,12 @@ class DB:
     def rest(cls):
         cls._instance = None
 
-    def __init__(self, path=None):
+    def __init__(self, path = None):
         # path is the base directory where the process data is stored.
         # if path=None then use the current directory is used.
         #
         # The all cases the path=directory must contain a file named "ke_process_config.env".
 
-        if path is None:
-            path = os.getenv('KE_DIR_MEMORY')
         if path is None:
             path = os.curdir
 

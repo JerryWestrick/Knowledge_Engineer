@@ -131,7 +131,7 @@ async def execute_process(process_name: str):
     step_no: int = 1
     start_time: float = time.time()
     e_stats = {}
-    steps_dir = os.getenv("KE_PROC_DIR_STEPS")
+    steps_dir = os.getenv("KE_PROC_DIR_PROMPTS")
     full_step_names = memory.glob_files(f"{steps_dir}/*.kepf")
     full_step_names.sort()
     for full_file_names in full_step_names:
@@ -164,7 +164,7 @@ async def execute_process(process_name: str):
 def list_all_processes():
     this_proc = Path(os.getcwd()).stem
     proc_list = f"List of all Steps in Process {this_proc}:"
-    steps_dir = os.getenv('KE_PROC_DIR_STEPS')
+    steps_dir = os.getenv('KE_PROC_DIR_PROMPTS')
     step_names = memory.glob_files(f"{steps_dir}/*.kepf")
     step_names.sort()
     for step_full_name in step_names:
@@ -219,7 +219,10 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
     step_parameters['prompt_name'] = Path(prompt_name).stem
     step_parameters['name'] = prompt_name[:-5]
 
-    step = Step(**step_parameters)
+    try:
+        step = Step(**step_parameters)
+    except TypeError as err:
+        log.error(f"Error in .llm line, unknown parm")
     # log.info(f"Step: {step}")
 
     # Check for Clear Directories

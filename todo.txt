@@ -3,11 +3,11 @@ Todo: add a .cmd line to the line_statement that will allow for execution of arb
 
 Todo: add a .wget local command to access web-pages
 
-Todo: The .llm line includes the parameter "text_file": "Planning/4- Review Implementation Log.md"
-      It is bother some to include a full path name for the log files.
-      The parameter should be dropped.
-      The filename should be f"{Prompt_Name} Log.md",
-      The directory should be the Log Directory. (A parameter in ke_process_config.env)?
-
 Todo: The 'Continue?' prompt with gpt 3.5 turbo does not seam to work...
+
+Todo: /home/jerry/PycharmProjects/Knowledge_Engineer/knowledge_engineer/ai.py:47: RuntimeWarning: coroutine 'AsyncModels.retrieve' was never awaited
+        AI.client.models.retrieve(model)
+        RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+        This is line 47:         AI.client.models.retrieve(model)
+        This is used to confirm that the model actually exists....
 
