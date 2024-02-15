@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import glob
 import json
 import time
 from pathlib import Path
@@ -212,13 +213,26 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
         log.error(f"Error in Prompt self.memory[{prompt_name}] {err}")
         raise
 
+    # Get the LLM Definition off of list on messages
     json_str = '{' + messages.pop(0)['content'] + '}'
     step_parameters = json.loads(json_str)
     step_parameters['prompt_name'] = Path(prompt_name).stem
     step_parameters['name'] = prompt_name[:-5]
 
     step = Step(**step_parameters)
-    log.info(f"Step: {step}")
+    # log.info(f"Step: {step}")
+
+    # Check for Clear Directories
+    if messages[0]['role'] == 'clear':
+        clear_msg = messages.pop(0)
+        json_str = '[ ' + clear_msg['content'] + ' ]'
+        dirs = json.loads(json_str)
+        log.info(f"Clearing {dirs}")
+        for d in dirs:
+            files = glob.glob(d)
+            for f in files:
+                os.remove(f)
+
     await step.run(proc_name, messages=messages)
     return step
 

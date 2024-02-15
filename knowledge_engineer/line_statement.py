@@ -11,6 +11,7 @@ LineStatement_Grammar = r"""
             | text_block_statement
             | exec_statement
             | llm_statement
+            | clear_statement
             
     role_statement: role_name 
     
@@ -26,6 +27,8 @@ LineStatement_Grammar = r"""
     text_block_statement: "text_block" rest_of_line
 
     llm_statement: "llm" rest_of_line
+
+    clear_statement: "clear" rest_of_line
     
     exec_statement:  "exec"
     
@@ -74,6 +77,11 @@ class MyTransformer(Transformer):
     def llm_statement(statement):
         # MyTransformer.log.info(f"llm_statement({statement})")
         return {'statement': 'llm_statement', 'parms': statement[0].strip()}
+
+    @staticmethod
+    def clear_statement(statement):
+        # MyTransformer.log.info(f"llm_statement({statement})")
+        return {'statement': 'clear_statement', 'parms': statement[0].strip()}
 
     @staticmethod
     def text_block_statement(statement):
@@ -163,57 +171,62 @@ class Compiler:
         for statement in statements:
             keyword = statement['statement']
 
-            if keyword == 'literal_line':
-                c = statement['content']
-                new_value = f"{stmts[role]}\n{c}"
-                stmts[role] = new_value.strip()     # Drop Leading and Trailing WhiteSpace
+            match keyword:
+                case 'literal_line':
+                    c = statement['content']
+                    new_value = f"{stmts[role]}\n{c}"
+                    stmts[role] = new_value.strip()     # Drop Leading and Trailing WhiteSpace
 
-            elif keyword == 'set_role':
-                role = statement['role']
+                case 'set_role':
+                    role = statement['role']
 
-            elif keyword == 'include_statement':
-                msgs = self.db.read_msgs(statement['name'], process_name=process_name)
-                for msg in msgs[:-1]:
-                    stmts[msg['role']] = f"{stmts[msg['role']]}\n{msg['content']}"
+                case 'include_statement':
+                    msgs = self.db.read_msgs(statement['name'], process_name=process_name)
+                    for msg in msgs[:-1]:
+                        stmts[msg['role']] = f"{stmts[msg['role']]}\n{msg['content']}"
 
-            elif keyword == 'llm_statement':
-                messages.append({'role': 'llm', 'content': statement['parms']})
+                case 'llm_statement':
+                    messages.append({'role': 'llm', 'content': statement['parms']})
 
-            elif keyword == 'text_block_statement':
-                # print(f"in {keyword}")
-                # Check for file-globing
-                if '*' in statement['name']:
-                    files = self.db.glob_files(statement['name'])
-                else:
-                    files = [statement['name']]
+                case 'clear_statement':
+                    messages.append({'role': 'clear', 'content': statement['parms']})
 
-                for file in files:
-                    # print(f"in {file}")
-                    # Logger.log('STEP',f"{colors.INFO}- {file}")
-                    # assumes only one msg is returned
-                    # @todo Modify to Auto include Proc when using proc...
-                    msgs = self.db[file]
-                    # print(f"in {file} 2")
-                    msg = msgs[0]
-                    # print(f"in {file} 3")
-                    # parts = file.split('/')
-                    content = f"\n```filename={file}\n{msg['content']}\n```"
-                    stmts[role] += content
+                case 'text_block_statement':
+                    # print(f"in {keyword}")
+                    # Check for file-globing
+                    if '*' in statement['name']:
+                        files = self.db.glob_files(statement['name'])
+                    else:
+                        files = [statement['name']]
 
-                # print(f"out {keyword}")
-                continue  # next line
+                    for file in files:
+                        # print(f"in {file}")
+                        # Logger.log('STEP',f"{colors.INFO}- {file}")
+                        # assumes only one msg is returned
+                        # @todo Modify to Auto include Proc when using proc...
+                        msgs = self.db[file]
+                        # print(f"in {file} 2")
+                        msg = msgs[0]
+                        # print(f"in {file} 3")
+                        # parts = file.split('/')
+                        content = f"\n```filename={file}\n{msg['content']}\n```"
+                        stmts[role] += content
 
-            elif keyword == 'exec_statement':
-                # self.log.info("In Execute Statement: {statement}", statement=statement)
-                if stmts['system'] != '':
-                    messages.append({'role': 'system', 'content': stmts['system']})
-                messages.append({'role': 'user', 'content': stmts['user']})
-                messages.append({"role": "exec", "content": "Execute Call AI Before Continuing"})
-                stmts = {'system': '', 'user': ''}
-            else:
-                errmsg = f"Invalid instruction [{keyword}] "
-                # self.log.error("{errmsg}", errmsg=errmsg)
-                raise Exception(f"{errmsg}")
+                    # print(f"out {keyword}")
+                    continue  # next line
+
+                case 'exec_statement':
+                    # self.log.info("In Execute Statement: {statement}", statement=statement)
+                    if stmts['system'] != '':
+                        messages.append({'role': 'system', 'content': stmts['system']})
+                    messages.append({'role': 'user', 'content': stmts['user']})
+                    messages.append({"role": "exec", "content": "Execute Call AI Before Continuing"})
+                    stmts = {'system': '', 'user': ''}
+
+                case _:
+                    errmsg = f"Invalid instruction [{keyword}] "
+                    # self.log.error("{errmsg}", errmsg=errmsg)
+                    raise Exception(f"{errmsg}")
 
         if stmts['system'] != '':
             messages.append({'role': 'system', 'content': stmts['system'].strip()})
