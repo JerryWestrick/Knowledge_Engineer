@@ -91,14 +91,18 @@ def main():
 async def execute_step(proc_name: str, step_name: str) -> Step:
     prompt_dir = os.getenv('KE_PROC_DIR_PROMPTS')
 
-    k: str = f"{step_name}"
-    if k[-5:] != '.kepf':
-        k = k + '.kepf'
-
-    if k.startswith(prompt_dir):
-        prompt_name = k
+    if step_name.startswith(prompt_dir):
+        prompt_name = step_name
     else:
-        prompt_name = f"{prompt_dir}/{k}"
+        prompt_name = f"{prompt_dir}/{step_name}"
+
+    if '*' in prompt_name:
+        step_names = glob.glob(prompt_name)
+        log.info(f"Found {step_names}")
+        prompt_name = step_names[0]
+
+    if prompt_name[-5:] != '.kepf':
+        prompt_name = prompt_name + '.kepf'
 
     try:
         messages = memory.read_msgs(prompt_name, process_name=proc_name)

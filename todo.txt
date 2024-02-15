@@ -12,3 +12,7 @@ Todo: /home/jerry/PycharmProjects/Knowledge_Engineer/knowledge_engineer/ai.py:47
         This is used to confirm that the model actually exists....
 
 Done: the Create Procedure Routine needs to be updated to new syntax...
+
+Todo: New Documentation is Required.
+
+Done: Allow '*' wild card in step name
