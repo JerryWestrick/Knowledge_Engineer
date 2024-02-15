@@ -3,10 +3,12 @@ import asyncio
 import glob
 import json
 import time
+from json import JSONDecodeError
 from pathlib import Path
 
 from dotenv import load_dotenv
 
+from knowledge_engineer.create_new_process import create_new_proc
 from knowledge_engineer.db import DB
 from knowledge_engineer.ai import AI
 from knowledge_engineer.logger import Logger
@@ -16,115 +18,6 @@ import os
 
 log = Logger(namespace="ke", debug=True)
 memory = DB()
-
-New_Process_Values: dict[str, str] = {
-    'ke_process_config':
-        """KE_PROC_DIR_PROMPTS='Prompts'
-KE_PROC_DIR_STEPS='Steps'
-KE_PROC_DIR_REQUIREMENTS='Requirements'
-OPENAI_API_KEY='<Your Open API Key>'
-""",
-
-    'example_step':
-        """{
-  "py/object": "step.Step",
-  "proto": null,
-  "name": "ExampleStep",
-  "prompt_name": "ExamplePrompt.kepf",
-  "verify_prompt": "",
-  "storage_path": "Planning",
-  "text_file": "ExampleStep Log.md",
-  "file_process_enabled": false,
-  "file_process_name": "",
-  "file_glob": "",
-  "macros": {},
-  "ai": {
-    "py/object": "ai.AI",
-    "temperature": 0.0,
-    "max_tokens": "51000",
-    "model": "gpt-3.5-turbo-1106",
-    "mode": "chat",
-    "messages": [],
-    "answer": "",
-    "files": {},
-    "e_stats": {
-      "prompt_tokens": 0,
-      "completion_tokens": 0,
-      "total_tokens": 0,
-      "sp_cost": 0.0,
-      "sc_cost": 0.0,
-      "s_total": 0.0,
-      "elapsed_time": 0.0
-    }
-  },
-  "pname": "test",
-  "interaction_no": 0
-}""",
-
-    'example_prompt':
-        """.include Requirements/Actor.kepf
-.user
-Read the description of the file the program in 'Requirements/ApplicationDescription.md'
-write a the python program to 'Code/HelloWorld.py'
-""",
-
-    'actor':
-        """.system
-You are an IT Engineer, programming a Python 3 Application
-Do not explain yourself.
-Do not apologize.
-Complete the tasks given in a way that is optimized for Chat GPT's easy comprehension while not leaving anything out.
-Check all code for correctness.
-Use MarkDown format for all None python answers.
-""",
-    'application_description':
-        """# Hello World Program
-
-This program when executed write the text "Hello World!" to the terminal.
-"""
-}
-
-
-def create_new_proc(proc_name: str) -> None:
-    log.info(f"Create new process {proc_name}")
-    # Check that that directory f"./{proc_name}" does not exist:
-    if os.path.exists(f"./{proc_name}"):
-        log.error(f"Proc {proc_name} already exists")
-        return
-
-    # Create ExampleProcess in f"./{proc_name}"
-    os.makedirs(f"./{proc_name}")
-
-    # Create Example Config File
-    with open(f"./{proc_name}/ke_process_config.env", "w") as f:
-        f.write(New_Process_Values['ke_process_config'])
-
-    # Create Steps
-    os.makedirs(f"./{proc_name}/Steps")
-    step = Step('ExampleStep.kestep',
-                storage_path='Planning',
-                text_file="ExampleStep Log.md",
-                prompt_name="ExamplePrompt.kepf",
-                ai=AI()
-                )
-    step.to_file(f"./{proc_name}/Steps/example_step.kestep")
-
-    # Create Example Prompt
-    os.makedirs(f"./{proc_name}/Prompts")
-    with open(f"./{proc_name}/Prompts/ExamplePrompt.kepf", "w") as f:
-        f.write(New_Process_Values['example_prompt'])
-
-    # Create Requirements and Actor.kepf
-    os.makedirs(f"./{proc_name}/Requirements")
-    with open(f"./{proc_name}/Requirements/Actor.kepf", "w") as f:
-        f.write(New_Process_Values['actor'])
-    with open(f"./{proc_name}/Requirements/ApplicationDescription.md", "w") as f:
-        f.write(New_Process_Values['application_description'])
-
-    os.chdir(f'./{proc_name}')
-    print(f"Created ExampleProcess in {proc_name}.")
-    print(f"Edit the ke_process_config.env, and insert your OPENAI_API_KEY.")
-
 
 async def execute_process(process_name: str):
     log.info(f"Begin Execution of Process {process_name}")
@@ -215,7 +108,14 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
 
     # Get the LLM Definition off of list on messages
     json_str = '{' + messages.pop(0)['content'] + '}'
-    step_parameters = json.loads(json_str)
+    try:
+        step_parameters = json.loads(json_str)
+    except JSONDecodeError as err:
+        log.error(f".llm line syntax error in Prompt {prompt_name}")
+        log.error(f"{json_str}")
+        log.error(f"{err.msg}")
+        exit(2)
+
     step_parameters['prompt_name'] = Path(prompt_name).stem
     step_parameters['name'] = prompt_name[:-5]
 
