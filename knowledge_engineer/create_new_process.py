@@ -5,58 +5,58 @@ from knowledge_engineer.logger import Logger
 New_Process_Prompts: dict[str, str] = {
     # =======================================
     '1- Make Requirements.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": "50000"
+        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": 50000
 .clear "Code/*", "Planning/*", "Logs/*"
 .include Requirements/Actor.kepf
 .user
 read Requirements/ApplicationDescription.md
-Make a Requirements Document for the "Snake" game which includes:
-- The info in Application Description (above)
-- List the games rules.
-- list the user interface/interactions
-Write the application description to 'Planning/Requirements.md'
+Make a Requirements Document for the "Snake" game.
+Write the application description to 'Planning/Requirements.md' using function 'write_file'
 .exec
-Read 'Planning/Requirements.md' re-write the file 'Planning/Requirements.md' including anything forgotten.
+read 'Planning/Requirements.md'.  Fully finish all sections leaving nothing not complete.
+re-write entire requirements to 'Planning/Requirements.md' using the function 'write_file'.
 """,
 
     # ==========================================
     '2- Make Implementation Plan.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": "50000"
+        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": 50000
 .include Requirements/Actor.kepf
 .user
 Read the requirements from file 'Planning/Requirements.md'.
-Design an implementation plan, which includes all functions / routines to be implemented
+Design an implementation plan, which lists all functions / routines to be implemented, along with its description.
 write implementation plan in file 'Planning/Implementation_Plan.md'
 .exec
-Study the implementation plan.  re-write 'Planning/Implementation_Plan.md' including any
-missing or additional routines.
+Study the implementation plan.
+Check for startup and shutdown, step loop and "if __name__ eq 'main'".
+write any missing or additional routines or comments to file 'Planning/Implementation_Plan.md'
 """,
 
     # ==========================================
     '3- Implement Snake Program.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": "50000"
+        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": 50000
+.clear "Code/*"
 .system
 You are a Python 3 programmer.
+Do not tell me what you are about to do or did.
+Write fully executable code, not 'dummy', 'pass', or 'here goes'.
 .user
-for context please read:
+for context please read the following files:
  - Requirements: 'Planning/Requirements.md' and
  - Implementation Plan: 'Planning/Implementation_Plan.md'
 
-code each routine into the file 'Code/Snake.py'
-Each function should have a docstring explaining its parameters and function.
+fully implement the program and write it to the file 'Code/Snake.py'
 .exec
-
-- Find a function that is not fully coded yet.
-- Code the function and rewrite the file 'Code/Snake.py'.
-- Then Prompt User with "\nContinue?".
-Repeat this until the program has been fully coded.
-Once all is fully coded, prompt User with "\nDone!"
+Go through the file 'Code/Snake.py',
+program all functions that is not fully coded, re-write the full 'Code/Snake.py'.
+.exec
+Go through file 'Code/Snake.py', look for any functions called that are not implemented,
+   implement all the missing functions and write entire file 'Code/Snake.py'
 .exec
 """,
 
     # ==========================================
     '4- Review Implementation.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": "50000"
+        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-1106", "max_tokens": 50000
 .system
 You are a Python 3 programmer.
 .user

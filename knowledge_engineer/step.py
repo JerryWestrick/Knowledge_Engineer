@@ -70,7 +70,7 @@ class Step:
         bottom_left = '╰──'
         # bottom_right = '──╯'
 
-        txt = f'{top_left}Step: {self.pname}:{self.name} -- {self.prompt_name}'
+        txt = f'{top_left}Step: {self.pname}:{self.name}'
         self.log.info(f"{txt}")
         self.log.info(
             f"│ Model: {self.ai.model}, Temperature: {self.ai.temperature}, Max Tokens: {int(self.ai.max_tokens):,}")
