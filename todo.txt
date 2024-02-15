@@ -1,0 +1,12 @@
+Todo: add a .cmd line to the line_statement that will allow for execution of arbitrary commands on local machine,
+      and return the result (stdout?).
+
+Todo: add a .cleanup line to delete all temp files from last generation.
+
+Todo: add a .wget local command to access web-pages
+
+Todo: The .llm line includes the parameter "text_file": "Planning/4- Review Implementation Log.md"
+      It is bother some to include a full path name for the log files.
+      The parameter should be dropped.
+      The filename should be f"{Prompt_Name} Log.md",
+      The directory should be the Log Directory. (A parameter in ke_process_config.env)?

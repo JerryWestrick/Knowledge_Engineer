@@ -22,42 +22,26 @@ class AI:
     memory = DB()
     client = None
 
-    def __init__(self,
-                 model: str = "gpt-3.5-turbo-1106",
-                 temperature: float = 0,
-                 max_tokens: int = 2000,
-                 mode: str = 'complete',
-                 messages: [dict[str, str]] = None,
-                 answer: str = None,
-                 files: dict[str, str] = None,
-                 e_stats: dict[str, float] = None
-                 ):
+    def __init__(self, llm_name: str, model: str = "gpt-3.5-turbo-1106",
+                 temperature: float = 0, max_tokens: int = 4000,
+                 mode: str = 'complete'):
+        self.llm_name: str = llm_name
         self.temperature: float = temperature
         self.max_tokens: int = max_tokens
         self.model: str = model
         self.mode: str = mode
-        self.messages: [dict[str, str]] = messages
-        if messages is None:
-            self.messages = []
-        self.answer: str = answer
-        if answer is None:
-            self.messages = []
-
-        self.files: dict[str, str] = files
-        if files is None:
-            self.files = {}
-
-        self.e_stats: dict[str, float] = e_stats
-        if e_stats is None:
-            self.e_stats = {
-                'prompt_tokens': 0.0,
-                'completion_tokens': 0.0,
-                'total_tokens': 0.0,
-                'sp_cost': 0.0,
-                'sc_cost': 0.0,
-                's_total': 0.0,
-                'elapsed_time': 0.0,
-            }
+        self.messages = []
+        self.messages = []
+        self.files = {}
+        self.e_stats = {
+            'prompt_tokens': 0.0,
+            'completion_tokens': 0.0,
+            'total_tokens': 0.0,
+            'sp_cost': 0.0,
+            'sc_cost': 0.0,
+            's_total': 0.0,
+            'elapsed_time': 0.0,
+        }
         if self.client is not None:
             try:
                 AI.client.models.retrieve(model)

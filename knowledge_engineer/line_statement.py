@@ -10,6 +10,7 @@ LineStatement_Grammar = r"""
             | include_statement
             | text_block_statement
             | exec_statement
+            | llm_statement
             
     role_statement: role_name 
     
@@ -23,6 +24,8 @@ LineStatement_Grammar = r"""
     include_statement: "include" rest_of_line
 
     text_block_statement: "text_block" rest_of_line
+
+    llm_statement: "llm" rest_of_line
     
     exec_statement:  "exec"
     
@@ -66,6 +69,11 @@ class MyTransformer(Transformer):
     def include_statement(statement):
         # MyTransformer.log.info(f"include_statement({statement})")
         return {'statement': 'include_statement', 'name': statement[0].strip()}
+
+    @staticmethod
+    def llm_statement(statement):
+        # MyTransformer.log.info(f"llm_statement({statement})")
+        return {'statement': 'llm_statement', 'parms': statement[0].strip()}
 
     @staticmethod
     def text_block_statement(statement):
@@ -164,10 +172,12 @@ class Compiler:
                 role = statement['role']
 
             elif keyword == 'include_statement':
-                fname = statement['name']
                 msgs = self.db.read_msgs(statement['name'], process_name=process_name)
                 for msg in msgs[:-1]:
                     stmts[msg['role']] = f"{stmts[msg['role']]}\n{msg['content']}"
+
+            elif keyword == 'llm_statement':
+                messages.append({'role': 'llm', 'content': statement['parms']})
 
             elif keyword == 'text_block_statement':
                 # print(f"in {keyword}")
