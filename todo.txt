@@ -1,6 +1,3 @@
-Todo: add a .cmd line to the line_statement that will allow for execution of arbitrary commands on local machine,
-      and return the result (stdout?).
-
 Todo: add a .wget local command to access web-pages
 
 Todo: The 'Continue?' prompt with gpt 3.5 turbo does not seam to work...
@@ -11,19 +8,9 @@ Todo: /home/jerry/PycharmProjects/Knowledge_Engineer/knowledge_engineer/ai.py:47
         This is line 47:         AI.client.models.retrieve(model)
         This is used to confirm that the model actually exists....
 
-Done: the Create Procedure Routine needs to be updated to new syntax...
-
 Todo: New Documentation is Required.
 
-Done: Allow '*' wild card in step name
-
-Done: Add a list of 'Models' that can be used in .kepf files
-
 Todo: Add routine to update OpenAI_API_Costs.py
-
-Done: Test the following approach:
-      1- Have LLM generate a prompt and place it in Planning,
-      2- use the Prompt in subsequent step.
 
 Todo: The file create_new_process.py, creates the example process structure.
       But the code in the prompts needs to be updated by hand.
@@ -31,3 +18,19 @@ Todo: The file create_new_process.py, creates the example process structure.
       To be used in future '-create' command.  This will simplify development.
 
 Todo: add syntax for .llm and .clear lines
+
+Done: the Create Procedure Routine needs to be updated to new syntax...
+
+Done: Allow '*' wild card in step name
+
+Done: Add a list of 'Models' that can be used in .kepf files
+
+Done: Test the following approach:
+      1- Have LLM generate a prompt and place it in Planning,
+      2- use the Prompt in subsequent step.
+
+Done: Fix relative include problem, allowing for debug to run outside  the current source directories.
+
+Done: add a .cmd line to the line_statement that will allow for execution of arbitrary commands on local machine,
+      and return the result (stdout?).
+

@@ -12,6 +12,7 @@ LineStatement_Grammar = r"""
             | exec_statement
             | llm_statement
             | clear_statement
+            | cmd_statement
             
     role_statement: role_name 
     
@@ -27,6 +28,8 @@ LineStatement_Grammar = r"""
     text_block_statement: "text_block" rest_of_line
 
     llm_statement: "llm" rest_of_line
+
+    cmd_statement: "cmd" rest_of_line
 
     clear_statement: "clear" rest_of_line
     
@@ -82,6 +85,11 @@ class MyTransformer(Transformer):
     def clear_statement(statement):
         # MyTransformer.log.info(f"llm_statement({statement})")
         return {'statement': 'clear_statement', 'parms': statement[0].strip()}
+
+    @staticmethod
+    def cmd_statement(statement):
+        # MyTransformer.log.info(f"llm_statement({statement})")
+        return {'statement': 'cmd_statement', 'parms': statement[0].strip()}
 
     @staticmethod
     def text_block_statement(statement):
@@ -190,6 +198,9 @@ class Compiler:
 
                 case 'clear_statement':
                     messages.append({'role': 'clear', 'content': statement['parms']})
+
+                case 'cmd_statement':
+                    messages.append({'role': 'cmd', 'content': statement['parms']})
 
                 case 'text_block_statement':
                     # print(f"in {keyword}")

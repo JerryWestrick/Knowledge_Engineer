@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
@@ -228,6 +229,24 @@ class AI:
         "patch": patch,
     }
 
+    async def execute_cmd(self, msg: dict[str, str]) -> list[ dict[str, str] ]:
+        if msg['role'] != 'cmd':
+            self.log.error(f"Programming error: {msg['role']} is not cmd")
+            return [{'role': 'user', 'content': f"Programming error {msg['role']} is not cmd...  "}]
+
+        command = f"{msg['content']}"
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+        output, error = process.communicate()
+        result = ''
+        if output:
+            result = f"{result}{output.decode('utf-8')}"
+        if error:
+            result = f"{result}{error.decode('utf-8')}"
+
+        # self.log.info(f"cmd {command} output: {result}")
+
+        return [{'role': 'user', 'content': result}]
+
     async def generate(self, step, user_messages: list[dict[str, str]], process_name: str):
 
         self.answer = f'Log of Step: {step.name} : {step.prompt_name}\n'
@@ -248,8 +267,14 @@ class AI:
 
             msg = user_messages.pop(0)
             while msg['role'] != 'exec':
-                self.messages.append(msg)
-                self.log.umsg(step, msg)
+                if msg['role'] == 'cmd':
+                    msgs = await self.execute_cmd(msg)
+                    self.messages.extend(msgs)
+                    for m in msgs:
+                        self.log.umsg(step, m)
+                else:
+                    self.messages.append(msg)
+                    self.log.umsg(step, msg)
                 msg = user_messages.pop(0)
                 continue
 
