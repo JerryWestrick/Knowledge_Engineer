@@ -13,6 +13,9 @@ Todo: The file create_new_process.py, creates the example process structure.
 
 Todo: add syntax for .llm, .clear, and .cmd lines
 
+Done: Update command prompt args interface to provide with better help,
+      maybe short-cuts like -exec or even -e
+
 Done: the Create Procedure Routine needs to be updated to new syntax...
 
 Done: Allow '*' wild card in step name

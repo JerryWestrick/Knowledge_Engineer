@@ -71,13 +71,16 @@ def main():
     # Create the parser
     parser = argparse.ArgumentParser(description="Knowledge Engineering: AI Prompt Memory Engineering Tool")
     # Add the arguments
-    # parser.add_argument("-proc", metavar="proc_name", type=str, help="execute the given process name")
-    parser.add_argument("-step", metavar="step_name", type=str, help="execute the given step in the proc")
-    parser.add_argument("-log", metavar="log", type=str, help="Log to the specified file")
-    parser.add_argument("-create", metavar="create", type=str, help="Create a process with given name")
-    parser.add_argument("-list", action='store_true', help="List Steps in Process")
-    parser.add_argument("-models", action='store_true', help="List all accepted Models")
-    parser.add_argument("-execute", action='store_true', help="Execute Process")
+
+    parser.add_argument("-c", "--create", metavar="dname", type=str, help="Create a new process in the given directory")
+
+    parser.add_argument("-l", "--list", action='store_true', help="List Steps in Process")
+    parser.add_argument("-models", action='store_true', help="List all OpenAI Models")
+
+    parser.add_argument("--log", metavar="fname", type=str, help="Log to the specified file")
+
+    parser.add_argument("-s", "--step", metavar="step_name", type=str, help="execute the given step in the proc")
+    parser.add_argument("-e", "--execute", action='store_true', help="Execute all steps in Process")
 
     # Parse the arguments
     args: argparse.Namespace = parser.parse_args()
@@ -110,7 +113,8 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
     if '*' in prompt_name:
         step_names = glob.glob(prompt_name)
         log.info(f"Found {step_names}")
-        prompt_name = step_names[0]
+        if len(step_names):
+            prompt_name = step_names[0]
 
     if prompt_name[-5:] != '.kepf':
         prompt_name = prompt_name + '.kepf'
