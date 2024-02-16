@@ -43,17 +43,17 @@ class AI:
             's_total': 0.0,
             'elapsed_time': 0.0,
         }
-        if self.client is not None:
-            try:
-                AI.client.models.retrieve(model)
-            except Exception as e:
-                AI.log.error(f"Error: {e}")
-                AI.log.warn(
-                    f"Model {model} not available for provided API key. Reverting "
-                    "to gpt-3.5-turbo. Sign up for the GPT-4 wait list here: "
-                    "https://openai.com/waitlist/gpt-4-api"
-                )
-                self.model = "gpt-3.5-turbo"
+        # if self.client is not None:
+        #     try:
+        #         AI.client.models.retrieve(model)
+        #     except Exception as e:
+        #         AI.log.error(f"Error: {e}")
+        #         AI.log.warn(
+        #             f"Model {model} not available for provided API key. Reverting "
+        #             "to gpt-3.5-turbo. Sign up for the GPT-4 wait list here: "
+        #             "https://openai.com/waitlist/gpt-4-api"
+        #         )
+        #         self.model = "gpt-3.5-turbo"
 
         # GptLogger.log('SYSTEM', f"Using model {self.model} in mode {self.mode}")
 

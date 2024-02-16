@@ -2,12 +2,6 @@ Todo: add a .wget local command to access web-pages
 
 Todo: The 'Continue?' prompt with gpt 3.5 turbo does not seam to work...
 
-Todo: /home/jerry/PycharmProjects/Knowledge_Engineer/knowledge_engineer/ai.py:47: RuntimeWarning: coroutine 'AsyncModels.retrieve' was never awaited
-        AI.client.models.retrieve(model)
-        RuntimeWarning: Enable tracemalloc to get the object allocation traceback
-        This is line 47:         AI.client.models.retrieve(model)
-        This is used to confirm that the model actually exists....
-
 Todo: New Documentation is Required.
 
 Todo: Add routine to update OpenAI_API_Costs.py
@@ -17,7 +11,7 @@ Todo: The file create_new_process.py, creates the example process structure.
       A command "Make Default" is required that saves the structure and contents of a proces,
       To be used in future '-create' command.  This will simplify development.
 
-Todo: add syntax for .llm and .clear lines
+Todo: add syntax for .llm, .clear, and .cmd lines
 
 Done: the Create Procedure Routine needs to be updated to new syntax...
 
@@ -33,4 +27,10 @@ Done: Fix relative include problem, allowing for debug to run outside  the curre
 
 Done: add a .cmd line to the line_statement that will allow for execution of arbitrary commands on local machine,
       and return the result (stdout?).
+
+Done: /home/jerry/PycharmProjects/Knowledge_Engineer/knowledge_engineer/ai.py:47: RuntimeWarning: coroutine 'AsyncModels.retrieve' was never awaited
+        AI.client.models.retrieve(model)
+        RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+        This is line 47:         AI.client.models.retrieve(model)
+        This is used to confirm that the model actually exists....
 

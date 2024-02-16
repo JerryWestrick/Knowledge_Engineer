@@ -92,7 +92,8 @@ def main():
 
         for k, v in OpenAI_API_Costs.items():
             model = '"' + v['model'] + '"'
-            log.info(f" {v['generic']:15} { model :25} {v['context']:>10,}")
+            generic = '"' + v['generic'] + '"'
+            log.info(f" {generic:15} { model :25} {v['context']:>10,}")
         return
 
     asyncio.run(run_ke(args))
