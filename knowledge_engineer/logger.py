@@ -78,6 +78,9 @@ class Logger:
             elif func_name == 'patch':
                 lines = args['patch_commands'].split('\n')
                 self.p(f"{self.ts()}{head}{fn} ({lines[0]}, ...)[green]{lines[:2]}[/]")
+            elif func_name == 'exec':
+                lines = args['command'].split('\n')
+                self.p(f"{self.ts()}{head}{fn} ({lines[0]}, ...)[green]{lines[:2]}[/]")
             else:
                 self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]")
 

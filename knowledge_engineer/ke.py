@@ -142,13 +142,19 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
         step = Step(**step_parameters)
     except TypeError as err:
         log.error(f"Error in .llm line, unknown parm")
+        exit(2)
     # log.info(f"Step: {step}")
 
     # Check for Clear Directories
     if messages[0]['role'] == 'clear':
         clear_msg = messages.pop(0)
         json_str = '[ ' + clear_msg['content'] + ' ]'
-        dirs = json.loads(json_str)
+        try:
+            dirs = json.loads(json_str)
+        except JSONDecodeError as err:
+            log.error(f"Error parsing .clear line: {err.msg}\n.clear {json_str[2:-2]}\n{'-'*(err.pos+5)}^")
+            exit(2)
+
         log.info(f"Clearing {dirs}")
         for d in dirs:
             files = glob.glob(d)

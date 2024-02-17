@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 import subprocess
 
 from dotenv import load_dotenv
@@ -15,6 +16,9 @@ load_dotenv()
 
 async def succeed(d: dict):
     return d
+
+
+os_descriptor = platform.platform()
 
 
 class AI:
@@ -43,24 +47,11 @@ class AI:
             's_total': 0.0,
             'elapsed_time': 0.0,
         }
-        # if self.client is not None:
-        #     try:
-        #         AI.client.models.retrieve(model)
-        #     except Exception as e:
-        #         AI.log.error(f"Error: {e}")
-        #         AI.log.warn(
-        #             f"Model {model} not available for provided API key. Reverting "
-        #             "to gpt-3.5-turbo. Sign up for the GPT-4 wait list here: "
-        #             "https://openai.com/waitlist/gpt-4-api"
-        #         )
-        #         self.model = "gpt-3.5-turbo"
-
-        # GptLogger.log('SYSTEM', f"Using model {self.model} in mode {self.mode}")
 
     async def read_file(self, name: str, process_name: str):
 
         try:
-            file_msgs = self.memory.read_msgs(name, process_name=process_name)
+            file_contents = self.memory.read(name, process_name=process_name)
 
         except Exception as err:
             self.log.error(f"Error while reading file for AI... {err}")
@@ -70,10 +61,7 @@ class AI:
                                     })
             return result
 
-        file_msg = file_msgs[0]
-        file_contents = file_msg['content']
-        result = await succeed({'role': 'function', 'name': 'read_file', 'content': file_contents})
-        return result
+        return await succeed({'role': 'function', 'name': 'read_file', 'content': file_contents})
 
     async def write_file(self, name: str, contents: str, process_name: str):
         full_name = name
@@ -82,8 +70,8 @@ class AI:
         except Exception as err:
             self.log.error(f"Error while writing file for AI... {err}")
             raise
-        result = await succeed({'role': 'function', 'name': 'write_file', 'content': 'Done.'})
-        return result
+
+        return await succeed({'role': 'function', 'name': 'write_file', 'content': 'Done.'})
 
     async def replace(self, name: str, old_code: str, new_code: str, process_name: str) -> dict:
         full_name = name
@@ -148,6 +136,32 @@ class AI:
                 result = await succeed({'role': 'function', 'name': 'patch', 'content': f'file {file_path} not found'})
         return result
 
+    def exec_subprocess(self, command: str) -> str:
+        """Execute a local command and return its output in a message structure"""
+
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        output, error = process.communicate()
+        txt = ''
+        if output:
+            txt = f"{txt}{output.decode('utf-8')}"
+        if error:
+            txt = f"{txt}Error: {error.decode('utf-8')}"
+
+        return txt
+
+    async def execute_cmd_prompt(self, command: str) -> dict[str, str]:
+        """Execute a command that was defined in a prompt file (.kepf)"""
+
+        answer = self.exec_subprocess(command)
+        msg = {'name': 'cmd', 'role': 'user', 'content': f'.cmd {answer}'}
+        return await succeed(msg)
+
+    async def execute_cmd_ai(self, command: str, process_name: str) -> dict[str, str]:
+        """Execute a local command by LLM request"""
+
+        txt = self.exec_subprocess(command)
+        msg = {'name': 'exec', 'role': 'function', 'content': f'AI exec {txt}'}
+        return await succeed(msg)
 
     functions = [
         {
@@ -219,6 +233,20 @@ class AI:
                 },
                 "required": ["patch_commands"],
             },
+        },
+        {
+            "name": "exec",
+            "description": f"Execute a command on the local {os_descriptor} system",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "command to be executed",
+                    },
+                },
+                "required": ["command"],
+            },
         }
 
     ]
@@ -227,25 +255,8 @@ class AI:
         "write_file": write_file,
         # "replace": replace,
         "patch": patch,
+        "exec": execute_cmd_ai,
     }
-
-    async def execute_cmd(self, msg: dict[str, str]) -> list[ dict[str, str] ]:
-        if msg['role'] != 'cmd':
-            self.log.error(f"Programming error: {msg['role']} is not cmd")
-            return [{'role': 'user', 'content': f"Programming error {msg['role']} is not cmd...  "}]
-
-        command = f"{msg['content']}"
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-        output, error = process.communicate()
-        result = ''
-        if output:
-            result = f"{result}{output.decode('utf-8')}"
-        if error:
-            result = f"{result}{error.decode('utf-8')}"
-
-        # self.log.info(f"cmd {command} output: {result}")
-
-        return [{'role': 'user', 'content': result}]
 
     async def generate(self, step, user_messages: list[dict[str, str]], process_name: str):
 
@@ -268,10 +279,9 @@ class AI:
             msg = user_messages.pop(0)
             while msg['role'] != 'exec':
                 if msg['role'] == 'cmd':
-                    msgs = await self.execute_cmd(msg)
-                    self.messages.extend(msgs)
-                    for m in msgs:
-                        self.log.umsg(step, m)
+                    answer = await self.execute_cmd_prompt(msg['content'])
+                    self.messages.append(answer)
+                    self.log.umsg(step, answer)
                 else:
                     self.messages.append(msg)
                     self.log.umsg(step, msg)

@@ -13,6 +13,16 @@ Todo: The file create_new_process.py, creates the example process structure.
 
 Todo: add syntax for .llm, .clear, and .cmd lines
 
+Todo: need a repository for example processes
+
+Done: '.clear' line parsing and error reporting.
+
+Done: Add a cmd function that the LLm can call, to allow it to execute arbitrary code on my machine
+
+Done: Add operating system to description of execute call
+
+Done: We get line_statement parse errors when AI attempts to read file that contains line starting with '.'
+
 Done: Update command prompt args interface to provide with better help,
       maybe short-cuts like -exec or even -e
 
