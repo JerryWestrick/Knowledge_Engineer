@@ -2,9 +2,30 @@
 
 ***Command Line Program allowing for the Engineering of Knowledge for Chat-GPT.***
 
-#  Screen Shot
 
-![screen_shot.png](screen_shot.png)
+# Quick Start
+### Installation
+
+    pip install knowledge-engineer
+
+### Create New Project
+    knowledge_engineer --create=snake
+
+### Setup Project
+    cd snake
+    edit ke_process_config.env
+
+    OPENAI_API_KEY='<Your Open API Key>'
+
+
+### execute example Project
+    knowledge_engineer --execute
+
+
+# Documentation
+- [Getting Started](Documentation/Getting Started/Getting Started.html)
+- [.kepf Reference](Documentation/Getting Started/Getting Started.html)
+
 
 # P.S.
 ## The project is managed with JetBrains YouTrack, and GitHub

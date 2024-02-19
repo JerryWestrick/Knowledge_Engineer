@@ -2,7 +2,7 @@ Todo: add a .wget local command to access web-pages
 
 Todo: The 'Continue?' prompt with gpt 3.5 turbo does not seam to work...
 
-Todo: New Documentation is Required.
+Todo: Reference of .kepf syntax is required.
 
 Todo: Add routine to update OpenAI_API_Costs.py
 
@@ -14,6 +14,10 @@ Todo: The file create_new_process.py, creates the example process structure.
 Todo: add syntax for .llm, .clear, and .cmd lines
 
 Todo: need a repository for example processes
+
+Todo: Need to make my own description on how to release software to pipy
+
+Done: Need new version of ReadMe.md
 
 Done: '.clear' line parsing and error reporting.
 
