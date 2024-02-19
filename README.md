@@ -23,8 +23,8 @@
 
 
 # Documentation
-- [Getting Started]('Documentation/Getting Started/Getting Started.html')
-- [.kepf Reference]('Documentation/Getting Started/Getting Started.html')
+- ![Getting Started]('Documentation/Getting Started/Getting Started.html')
+- ![.kepf Reference]('Documentation/Getting Started/Getting Started.html')
 
 
 # P.S.
