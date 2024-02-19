@@ -70,10 +70,10 @@ class Step:
         bottom_left = '╰──'
         # bottom_right = '──╯'
 
-        txt = f'{top_left}Step: {self.pname}:{self.name}'
+        txt = f'{top_left}Step: {self.pname}:"{self.name}"'
         self.log.info(f"{txt}")
         self.log.info(
-            f"│ Model: {self.ai.model}, Temperature: {self.ai.temperature}, Max Tokens: {int(self.ai.max_tokens):,}")
+            f'│ Model: "{self.ai.model}", Temperature: {self.ai.temperature}, Max Tokens: {int(self.ai.max_tokens):,}')
 
         try:
             # self.ai.messages = messages
@@ -88,7 +88,7 @@ class Step:
         # Write log file if required...
         log_dir: str = os.getenv('KE_PROC_DIR_LOGS')
         full_path: str = f"{log_dir}/{self.prompt_name} log.md"
-        self.log.info(f"│ Writing log {full_path}")
+        self.log.info(f'│ Writing log "{full_path}"')
         self.memory[full_path] = self.ai.answer
 
         total_tokens = (int(self.ai.e_stats['prompt_tokens']) + int(self.ai.e_stats['completion_tokens']))

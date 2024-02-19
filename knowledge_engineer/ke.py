@@ -20,7 +20,7 @@ memory = DB()
 
 
 async def execute_process(process_name: str):
-    log.info(f"Begin Execution of Process {process_name}")
+    log.info(f'Begin Execution of Process "{process_name}"')
     step_no: int = 1
     start_time: float = time.time()
     e_stats = {}
@@ -32,7 +32,7 @@ async def execute_process(process_name: str):
         sname = dirs[-1]
         # pname = '/'.join(dirs[:-2])
         # step = Step.from_file(pname, sname)
-        log.info(f"Execute {process_name}({step_no}): {sname}")
+        log.info(f'Execute {process_name}({step_no}): "{sname}"')
         step = await execute_step(process_name, sname)
         # await step.run(process_name)
         for k, v in step.ai.e_stats.items():
@@ -112,7 +112,7 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
 
     if '*' in prompt_name:
         step_names = glob.glob(prompt_name)
-        log.info(f"Found {step_names}")
+        log.info(f'Found "{step_names}"')
         if len(step_names):
             prompt_name = step_names[0]
 

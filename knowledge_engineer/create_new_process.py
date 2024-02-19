@@ -4,11 +4,11 @@ from knowledge_engineer.logger import Logger
 
 New_Process_Prompts: dict[str, str] = {
     # =======================================
-    '1- 1- Make Generate Code Prompt.kepf':
+    '1- Make Generate Code Prompt.kepf':
         """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
 .clear "Code/*", "Planning/*", "Logs/*"
 .system
-You are a Knowledge Engineer creating a GPT3.5 prompt.
+You are a Knowledge Engineer creating a GPT4 Turbo prompt.
 The prompt will instruct GPT3.5 to create a Python 3 Application
 Do not explain yourself.
 Do not apologize.
@@ -16,9 +16,10 @@ Complete the tasks given in a way that is optimized for Chat GPTs easy comprehen
 Your answers will be in MarkDown
 .user
 read the description of the program: Requirements/ApplicationDescription.md
-create a prompt that will instruct GPT 3.5 Turbo to:
+create a prompt that will instruct GPT 4 Turbo to:
  - create a complete running program as described.
  - contain initialize, process, and terminate phases
+ - list all the rules to be implemented
  - implement all the requirements in the prompts
 Write the prompt to 'Planning/Gen_Code_Prompt.md' using function 'write_file'.
 .exec
@@ -26,7 +27,7 @@ Write the prompt to 'Planning/Gen_Code_Prompt.md' using function 'write_file'.
 
     # ==========================================
     '2- Make Snake Game.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
+        """.llm "llm_name": "OpenAI", "model": "gpt-4-0125-preview", "max_tokens": 50000
 
 .system
 You are an IT Engineer, programming a Python 3 Application
@@ -44,7 +45,17 @@ write a complete executable program to 'Code/snake.py' with the 'write_file' fun
 
 }
 
-New_Process_Requirements: dict[str, str] = {
+Base_Dir: dict[str, str] = {
+    # =======================================
+    'ke_process_config.env':
+        """KE_PROC_DIR_PROMPTS='Prompts'
+KE_PROC_DIR_LOGS='Logs'
+OPENAI_API_KEY='<Your Open API Key>'
+""",
+
+}
+
+Requirements_Dir: dict[str, str] = {
 
     # =======================================
     'ApplicationDescription.md':
@@ -63,9 +74,9 @@ game_board size is 480x480.
 use different colors for snake and foods
 
 #### Game Play:
-The game is implemented as steps 5 per second.
+The game is implemented as steps 10 per second.
 
-""",
+"""
 }
 
 
@@ -81,14 +92,10 @@ def create_new_proc(proc_name: str) -> None:
     # Create ExampleProcess in f"./{proc_name}"
     os.makedirs(f"./{proc_name}")
 
-    # Create Example Config File
-    with open(f"./{proc_name}/ke_process_config.env", "w") as f:
-        f.write("""KE_PROC_DIR_PROMPTS='Prompts'
-KE_PROC_DIR_REQUIREMENTS='Requirements'
-KE_PROC_DIR_LOGS='Logs'
-OPENAI_API_KEY='<Your Open API Key>'
-"""
-                )
+    # fill Base Directory
+    for k, v in Base_Dir.items():
+        with open(f"./{proc_name}/{k}", "w") as f:
+            f.write(v)
 
     # Create Prompt Directory
     os.makedirs(f"./{proc_name}/Prompts")
@@ -96,9 +103,9 @@ OPENAI_API_KEY='<Your Open API Key>'
         with open(f"./{proc_name}/Prompts/{k}", "w") as f:
             f.write(v)
 
-    # Create Requirements Directory
+    # Create Prompt Directory
     os.makedirs(f"./{proc_name}/Requirements")
-    for k, v in New_Process_Requirements.items():
+    for k, v in Requirements_Dir.items():
         with open(f"./{proc_name}/Requirements/{k}", "w") as f:
             f.write(v)
 
