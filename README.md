@@ -23,8 +23,8 @@
 
 
 # Documentation
-- [Getting Started](Documentation/Getting Started/Getting Started.html)
-- [.kepf Reference](Documentation/Getting Started/Getting Started.html)
+- [Getting Started]('Documentation/Getting Started/Getting Started.html')
+- [.kepf Reference]('Documentation/Getting Started/Getting Started.html')
 
 
 # P.S.
@@ -61,4 +61,4 @@ a Step file called "1- Step One" will be looked for in the directory:
 
 # Links and AIDs
 
-[Distribute Python with pip install](Documentation/How to Create Python Packages _ Towards Data Science.pdf)
+[Distribute Python with pip install]('Documentation/How to Create Python Packages _ Towards Data Science.pdf')
