@@ -23,7 +23,7 @@
 
 
 # Documentation
-[Getting Started](Documentation/Getting%20Started/Getting%20Started.html)
+[Getting Started](Documentation/Getting%20Started/Getting%20Started.pdf)
 
 [.kepf Reference]('Documentation/Getting Started/Getting Started.html')
 
