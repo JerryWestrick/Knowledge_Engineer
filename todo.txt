@@ -11,7 +11,7 @@ Todo: The file create_new_process.py, creates the example process structure.
       A command "Make Default" is required that saves the structure and contents of a proces,
       To be used in future '-create' command.  This will simplify development.
 
-Todo: add syntax for .llm, .clear, and .cmd lines
+Todo: add syntax for .llm, .clear, .include, and .cmd lines
 
 Todo: need a repository for example processes
 
