@@ -183,11 +183,11 @@ Start a user message
 - convert it to text and 
 - store it in the file 'Planning/openai_pricing.txt'
 
-    ```
-    read the file 'Planning/openai_pricing.txt'
-    Describe the different offerings from OpenAI and write it to 'Code/OpenAI_API_Pricing.md'.
-    Make document pretty, by using colors and arranging the info in tables.
-    ```
+```
+read the file 'Planning/openai_pricing.txt'
+Describe the different offerings from OpenAI and write it to 'Code/OpenAI_API_Pricing.md'.
+Make document pretty, by using colors and arranging the info in tables.
+```
   
 Add the "Prompt Text" lines to the user message.
 
