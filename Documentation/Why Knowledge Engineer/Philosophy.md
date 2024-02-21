@@ -99,14 +99,18 @@ Old Disadvantages of Waterfall:
 - Tedious and time-consuming. (This is not a problem for AI)
 - You have to know every requirement at the beginning. (This is not a problem for AI)
 
+The WaterFall Technic gets its name from each Step having to be completed before the next step can be started.  It is a strict top-down process.  Each step has a very specific input and a very specific output.  The output of one step is the input to the next step.  The process is very well-defined and understood.
+
+We dropped the WaterFall technique in the 60's because it was too time-consuming.  By the time we got to programming the system, the user market requirements had changed.  By the time the end user got the system it was already outdated. This is not a problem with AI.  It can do the steps very quickly and consistently.  It can also quickly restart at the beginning if an input to a previous step is changed.
+
 ## The Waterfall Technique with AI
-Okay lets look an over simplified example:  
+Okay lets look at an over simplified example:  
 
 ### 1- Make Requirements
 - Read the description of the application in the file Requirements/ApplicationDescription.md 
 - Generate a list of rules for the game of Snake to Requirements/SnakeGameRules.md
 - Generate a list of requirements for the Snake program that includes implementation of all the rules in Requirements/SnakeGameRules.md and write it to Requirements/SnakeGameRequirements.md
-- 
+
 
 That is a definite "can do" with the current level of AI.  
 But more importantly, it can do it consistently (allowing automation)
@@ -125,6 +129,10 @@ and could actually get AI to produce something useful.
 
 ## Knowledge Engineer is built to help you do just that...
 
+
 Jerry The Dinosaur
 
+**_P.S._** 
+Maybe it took a Dinosaur to see how our ancient techniques could be used with modern technology.  
+But I think it is a good idea.  What do you think?
 
