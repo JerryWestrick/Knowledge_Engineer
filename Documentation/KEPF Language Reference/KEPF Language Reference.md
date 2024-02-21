@@ -25,7 +25,7 @@ There are 2 types of statements:
    - followed one or more whitespace
    - and optionally may have text between the whitespace and the end of line.
 
-   
+```   
     +-- period
     |   +-- keyword
     |   |   +-- whitespace
@@ -34,7 +34,7 @@ There are 2 types of statements:
     |   |   |     |
     v   v   v     v
     .include Planning/Gen_Code_Prompt.md 
-
+``` 
 2. ***Prompt Text***: These are lines that do not follow the above syntax.  
     The text is included in the 'current message'.  
 
