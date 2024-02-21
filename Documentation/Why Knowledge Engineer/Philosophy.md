@@ -97,6 +97,7 @@ Advantages:
 Old Disadvantages of Waterfall:
 - Have to restart at the beginning, if an input to a previous step is changed. (This is not a problem for AI)  
 - Tedious and time-consuming. (This is not a problem for AI)
+- You have to know every requirement at the beginning. (This is not a problem for AI)
 
 ## The Waterfall Technique with AI
 Okay lets look an over simplified example:  
