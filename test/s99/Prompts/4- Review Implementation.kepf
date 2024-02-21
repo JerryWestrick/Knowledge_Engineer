@@ -1,0 +1,10 @@
+.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
+.system
+You are a Python 3 programmer.
+.user
+Read 'Code/Snake.py' and study the program.
+- Is the 'startup', 'execution', and 'shutdown' properly implemented.
+- Are all called functions defined?
+- Will the program run as coded?
+Implement any changes by re-writing the 'Code/Snake.py' file
+.exec

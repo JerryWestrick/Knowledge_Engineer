@@ -1,0 +1,19 @@
+.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
+.clear "Code/*"
+.system
+You are a Python 3 programmer.
+Do not tell me what you are about to do or did.
+Write fully executable code, not 'dummy', 'pass', or 'here goes'.
+.user
+for context please read the following files:
+ - Requirements: 'Planning/Requirements.md' and
+ - Implementation Plan: 'Planning/Implementation_Plan.md'
+
+fully implement the program and write it to the file 'Code/Snake.py'
+.exec
+Go through the file 'Code/Snake.py',
+program all functions that is not fully coded, re-write the full 'Code/Snake.py'.
+.exec
+Go through file 'Code/Snake.py', look for any functions called that are not implemented,
+   implement all the missing functions and write entire file 'Code/Snake.py'
+.exec

@@ -1,0 +1,6 @@
+.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
+.clear "Planning/*", "Code/*"
+Gather info about my current directory and sub directory into 'Planning/dir_info.txt'.
+.exec
+Read 'Planning/dir_info.txt' and tell me what you can about the structure in a report ('Code/Directory Structure.md').
+.exec
