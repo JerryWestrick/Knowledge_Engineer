@@ -38,9 +38,9 @@ Enter Your OpenAI API Key in the following line of the ke_process_config.env fil
 
 
 ## For Developers
-- Aditionaly, the [Release A Version](Documentation/Release A Version/Release A Version.md)  explains how to update PiPy (pip install) directory with future versions of the knowledge-engineer package.
+- Aditionaly, the [Release A Version](Documentation/Release%20A%20Version/Release%20A%20Version.md)  explains how to update PiPy (pip install) directory with future versions of the knowledge-engineer package.
 
 
 ## For Philosophers
-- The [Why Knowledge Engineer](Documentation/Why Knowledge Engineer/Philosophy.md) document explains why I feel that LLMs need 'Knowledge Engineer'.
+- The [Why Knowledge Engineer](Documentation/Why%20Knowledge%20Engineer/Philosophy.md) document explains why I feel that LLMs need 'Knowledge Engineer'.
 
