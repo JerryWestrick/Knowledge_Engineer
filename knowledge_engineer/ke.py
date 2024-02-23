@@ -9,6 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from knowledge_engineer.OpenAI_API_Costs import OpenAI_API_Costs
+from knowledge_engineer.ai import AI
 from knowledge_engineer.create_new_process import create_new_proc
 from knowledge_engineer.db import DB
 from knowledge_engineer.logger import Logger
@@ -75,12 +76,14 @@ def main():
     parser.add_argument("-c", "--create", metavar="dname", type=str, help="Create a new process in the given directory")
 
     parser.add_argument("-l", "--list", action='store_true', help="List Steps in Process")
-    parser.add_argument("-models", action='store_true', help="List all OpenAI Models")
+    parser.add_argument("-m", "--models", action='store_true', help="List all OpenAI Models")
 
     parser.add_argument("--log", metavar="fname", type=str, help="Log to the specified file")
 
     parser.add_argument("-s", "--step", metavar="step_name", type=str, help="execute the given step in the proc")
     parser.add_argument("-e", "--execute", action='store_true', help="Execute all steps in Process")
+
+    parser.add_argument("-f", "--functions", action='store_true', help="List implemented functions available to AI")
 
     # Parse the arguments
     args: argparse.Namespace = parser.parse_args()
@@ -90,13 +93,32 @@ def main():
         return
 
     if args.models:
-        log.info(f" {'Generic':15} {'Model':25} {'Max Token'}")
-        log.info(f" {'-' * 15} {'-'*25} {'-'*10}")
+        log.info(f" {'LLM':10} {'Generic':15} {'Model':25} {'Max Token'}")
+        log.info(f" {'-' * 10} {'-' * 15} {'-'*25} {'-'*10}")
 
-        for k, v in OpenAI_API_Costs.items():
+        keys: list[str] = list(OpenAI_API_Costs.keys())
+        keys.sort()
+        for k in keys:
+            v = OpenAI_API_Costs.get(k)
             model = '"' + v['model'] + '"'
             generic = '"' + v['generic'] + '"'
-            log.info(f" {generic:15} { model :25} {v['context']:>10,}")
+            llm = '"OpenAI"'
+            log.info(f" {llm:10} {generic:15} { model :25} {v['context']:>10,}")
+        return
+
+    if args.functions:
+        log.info(f" {'Function':45} {'Description':50}")
+        log.info(f" {'-' * 45} {'-' * 75}")
+
+        for func in AI.functions:
+            parm_str = ''
+            params = func['parameters']['properties']
+            for pname, pdef in params.items():
+                ptype = pdef['type']
+                pdesc = pdef['description']
+                parm_str += ', ' + pname + ': ' + ptype
+            func_str = f"{func['name']}({parm_str[2:]})"
+            log.info(f" {func_str:45} \"{func['description']}\"")
         return
 
     asyncio.run(run_ke(args))
