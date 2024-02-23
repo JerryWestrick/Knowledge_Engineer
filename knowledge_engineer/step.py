@@ -2,8 +2,6 @@
 import os
 import time
 
-import jsonpickle
-
 from .ai import AI
 from .db import DB
 from .logger import Logger

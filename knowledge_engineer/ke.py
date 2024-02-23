@@ -70,20 +70,51 @@ def list_all_processes():
 
 def main():
     # Create the parser
-    parser = argparse.ArgumentParser(description="Knowledge Engineering: AI Prompt Memory Engineering Tool")
-    # Add the arguments
+    # parser = argparse.ArgumentParser(description="Knowledge Engineering: AI Prompt Memory Engineering Tool")
+    # # Add the arguments
+    #
+    # parser.add_argument("-c", "--create", metavar="dname", type=str, help="Create a new process in the given directory")
+    #
+    # parser.add_argument("-l", "--list", action='store_true', help="List Steps in Process")
+    # parser.add_argument("-m", "--models", action='store_true', help="List all OpenAI Models")
+    #
+    # parser.add_argument("--log", metavar="fname", type=str, help="Log to the specified file")
+    #
+    # parser.add_argument("-s", "--step", metavar="step_name", type=str, help="execute the given step in the proc")
+    # parser.add_argument("-e", "--execute", action='store_true', help="Execute all steps in Process")
+    #
+    # parser.add_argument("-f", "--functions", action='store_true', help="List implemented functions available to AI")
+    #
 
-    parser.add_argument("-c", "--create", metavar="dname", type=str, help="Create a new process in the given directory")
+    import argparse
 
-    parser.add_argument("-l", "--list", action='store_true', help="List Steps in Process")
-    parser.add_argument("-m", "--models", action='store_true', help="List all OpenAI Models")
+    # Create the parser
+    parser = argparse.ArgumentParser(
+        description="Knowledge Engineering: AI Prompt Memory Engineering Tool",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter  # This can help with showing default values
+    )
 
-    parser.add_argument("--log", metavar="fname", type=str, help="Log to the specified file")
+    # Group arguments to enhance readability
+    process_management_group = parser.add_argument_group('Process Management')
+    process_management_group.add_argument("-c", "--create", metavar="dir", type=str,
+                                          help="Create a new process in the specified directory")
+    process_management_group.add_argument("-l", "--list", action='store_true',
+                                          help="List all steps in the current process")
+    execution_control_group = parser.add_argument_group('Execution Control')
+    execution_control_group.add_argument("-e", "--execute", action='store_true',
+                                          help="Execute all steps in the current process")
 
-    parser.add_argument("-s", "--step", metavar="step_name", type=str, help="execute the given step in the proc")
-    parser.add_argument("-e", "--execute", action='store_true', help="Execute all steps in Process")
+    execution_control_group.add_argument("-s", "--step", metavar="name", type=str,
+                                         help="Execute the specified step in the process")
+    execution_control_group.add_argument("--log", metavar="FILE", type=str, help="Log output to the specified file")
 
-    parser.add_argument("-f", "--functions", action='store_true', help="List implemented functions available to AI")
+    information_group = parser.add_argument_group('Information')
+    information_group.add_argument("-m", "--models", action='store_true', help="List all available OpenAI models")
+    information_group.add_argument("-f", "--functions", action='store_true',
+                                   help="List all implemented functions available to AI")
+
+    # Parse the arguments (This line is necessary for the actual argument parsing, but not for generating the help text)
+    # args = parser.parse_args()
 
     # Parse the arguments
     args: argparse.Namespace = parser.parse_args()

@@ -2,3 +2,4 @@ rich
 openai
 python-dotenv
 lark
+unidiff

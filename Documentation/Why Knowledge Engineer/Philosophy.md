@@ -14,17 +14,17 @@ This is the famous ***context size***.  I refer to it as "***short attention spa
 which is the easiest way to understand the effects.  
 
 Newer models of AI have increased the ***context sizes*** from 32k tokens to 128K tokens (a factor of 4 times). 
-This works a lot better, **_but_** does not give us an attention span 4 times longer.  
+This works a lot better, **_but does not_** give us an attention span 4 times longer.  
 
 We are pushing up a curve of diminishing returns!
 
 # Current Knowledge Management Solutions
 
 There are 2 **_standard_** solutions for managing knowledge size:
-1. Summarizing - Shortening the length of text
+1. Summarizing and
 2. Semantic Searches 
 
-## 1. Summarizing - Shortening the length of text
+## 1. Summarizing
 
 Consider the case where we want to use the Knowledge presented in a large book.
 The book exceeds the context size by a huge margin.
@@ -48,9 +48,12 @@ So for this to work well **_the "book" must be designed to be used in such a way
 
 ## 2. Semantic Searches 
 In this solution we break the knowledge into arbitrary chunks of fixed size.  We then tokenize the chunks. 
-The chunk is then stored in a database that allows you to identify text that is **_semantically similar_** to the question you are asking.  The Semantic Database will give you a rating of which chunks have Semantically similar words in proximity to each other. You then identify the chunk that "best matches", retrieve that text and feed that text to the AI, with your question.
+The chunk is then stored in a database that allows you to identify text that is **_semantically similar_** to the question you are asking.  
+The Semantic Database will give you a rating of which chunks have Semantically similar words in proximity to each other. 
+You then identify the chunk that "best matches", retrieve that text and feed that text to the AI, with your question.
 
-**_Although the semantic search itself is a wonder of modern IT_**, the concept of feeding the AI arbitrary "chunks" out of a knowledge base and hoping that the chunk is coherent, and that the Ai can make sense of the knowledge is doubtful at best.
+**_Although the semantic search itself is a wonder of modern IT_**, the concept of feeding the AI arbitrary "chunks" out of a knowledge base 
+and hoping that the chunk is coherent, and that the AI can make sense of the knowledge is doubtful at best.
 
 #### Your Milage May Vary
 
@@ -65,7 +68,10 @@ But let's start from the beginning...
 
 We could ask AI to **_"Write a Snake Game using pygame."_**, and expect it to output the entire python program just like that.  If you fudge with the prompts enough you might even get it to work every once in a while.  
 
-But the only reason that works is that there are thousands of snake game implementations that it was trained on. (The snake game is a typical intermediate exercise that is given to many programmers).
+But the only reason that it works is that there are thousands of 
+snake game implementations that the AI was trained on. 
+(The snake game is a typical intermediate exercise that is given to
+many programmers).
 
 Do something useful beyond that? That is simply not within the attention span of current LLMs.
 
@@ -77,15 +83,21 @@ We need to manage the Knowledge:
 - We need to break the problem into the steps.  
 - Each step needs to use specific inputs designed exactly for that step.  
 - The problem within the step needs to be singularly focused on one problem.  
-- Each output needs to be designed to output exactly what is required the next step. 
-- We need a system that is strictly top down without any complications.  
+- Each output needs to be designed to output exactly what is required 
+for the next step. 
+- We need a system that is strictly top down without cyclic complications.  
 - each step needs its own problem domain.
-- The AI must already know how to solve the problem domain of the step.
+- The AI must know how to solve the problem within the domain of each step.
 
-Sounds impossible?  Well, It is not.  It the well known and best studied (AI knows it well) and it is called: 
+Sounds impossible?  Well, It is not.  there is a well known and methodology 
+meets all the conditions.  It is one of the most studied IT Methodologies 
+ever (Therefor AI knows it well). 
+
+It is called: 
 #### The WaterFall Technique
 
-***What? Are you Crazy? That old stuff we threw away in the 60's?*** 
+What? Are you Crazy? That old stuff we threw away in the 60's?  
+Yep, that is the one! 
 
 ## The Waterfall Technique
 
@@ -133,6 +145,7 @@ and could actually get AI to produce something useful.
 Jerry The Dinosaur
 
 **_P.S._** 
-Maybe it took a Dinosaur to see how our ancient techniques could be used with modern technology.  
-But I think it is a good idea.  What do you think?
+Maybe it took a Dinosaur to see how our most ancient techniques 
+would work well with the newest most modern technology.  
+But I think it is a good idea,  What do you think?
 
