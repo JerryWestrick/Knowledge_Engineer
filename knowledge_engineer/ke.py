@@ -16,6 +16,7 @@ from knowledge_engineer.logger import Logger
 from knowledge_engineer.step import Step
 import os
 
+
 log = Logger(namespace="ke", debug=True)
 memory = DB()
 
@@ -70,25 +71,6 @@ def list_all_processes():
 
 def main():
     # Create the parser
-    # parser = argparse.ArgumentParser(description="Knowledge Engineering: AI Prompt Memory Engineering Tool")
-    # # Add the arguments
-    #
-    # parser.add_argument("-c", "--create", metavar="dname", type=str, help="Create a new process in the given directory")
-    #
-    # parser.add_argument("-l", "--list", action='store_true', help="List Steps in Process")
-    # parser.add_argument("-m", "--models", action='store_true', help="List all OpenAI Models")
-    #
-    # parser.add_argument("--log", metavar="fname", type=str, help="Log to the specified file")
-    #
-    # parser.add_argument("-s", "--step", metavar="step_name", type=str, help="execute the given step in the proc")
-    # parser.add_argument("-e", "--execute", action='store_true', help="Execute all steps in Process")
-    #
-    # parser.add_argument("-f", "--functions", action='store_true', help="List implemented functions available to AI")
-    #
-
-    import argparse
-
-    # Create the parser
     parser = argparse.ArgumentParser(
         description="Knowledge Engineering: AI Prompt Memory Engineering Tool",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter  # This can help with showing default values
@@ -112,6 +94,9 @@ def main():
     information_group.add_argument("-m", "--models", action='store_true', help="List all available OpenAI models")
     information_group.add_argument("-f", "--functions", action='store_true',
                                    help="List all implemented functions available to AI")
+
+    information_group.add_argument("-v", "--version", action='store_true',
+                                   help="Print the version of Knowlege_Engineer")
 
     # Parse the arguments (This line is necessary for the actual argument parsing, but not for generating the help text)
     # args = parser.parse_args()
@@ -150,6 +135,13 @@ def main():
                 parm_str += ', ' + pname + ': ' + ptype
             func_str = f"{func['name']}({parm_str[2:]})"
             log.info(f" {func_str:45} \"{func['description']}\"")
+        return
+
+    if args.version:
+        import importlib.metadata
+        package_name = __name__.split('.')[0]
+        version = importlib.metadata.version(package_name)
+        log.info(f" {package_name} version: {version}")
         return
 
     asyncio.run(run_ke(args))
