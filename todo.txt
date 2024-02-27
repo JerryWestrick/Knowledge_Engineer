@@ -17,6 +17,9 @@ Todo: need a repository for example processes
 
 Todo: Need to make my own description on how to release software to pipy
 
+Done: When using .clear to delete the Code/ Directory an error may appear about .__py_cache__ being a directory.  It
+    seems that the method of deletion does not work for sub-directories...
+
 Done: Need new version of ReadMe.md
 
 Done: '.clear' line parsing and error reporting.

@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import glob
 import json
+import shutil
 import time
 from json import JSONDecodeError
 from pathlib import Path
@@ -204,7 +205,12 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
         for d in dirs:
             files = glob.glob(d)
             for f in files:
-                os.remove(f)
+                if os.path.isdir(f):
+                    shutil.rmtree(f)
+                elif os.path.isfile(f):
+                    os.remove(f)
+                else:
+                    log.error(f"Unknown file type {f}")
 
     await step.run(proc_name, messages=messages)
     return step
