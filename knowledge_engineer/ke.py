@@ -110,8 +110,8 @@ def main():
         return
 
     if args.models:
-        log.info(f" {'LLM':10} {'Generic':15} {'Model':25} {'Max Token'}")
-        log.info(f" {'-' * 10} {'-' * 15} {'-'*25} {'-'*10}")
+        log.info(f" {'LLM':10} {'Generic':15} {'Model':25} {'Max Token'} {'$/k-Tok In':>12} {'$/k-Tok Out':>12}")
+        log.info(f" {'-' * 10} {'-' * 15} {'-'*25} {'-'*10} {'-'*12} {'-'*12} ")
 
         keys: list[str] = list(OpenAI_API_Costs.keys())
         keys.sort()
@@ -119,8 +119,10 @@ def main():
             v = OpenAI_API_Costs.get(k)
             model = '"' + v['model'] + '"'
             generic = '"' + v['generic'] + '"'
+            input = f"{v['input']:06.4f}"
+            output = f"{v['output']:06.4f}"
             llm = '"OpenAI"'
-            log.info(f" {llm:10} {generic:15} { model :25} {v['context']:>10,}")
+            log.info(f" {llm:10} {generic:15} { model :25} {v['context']:>10,} {input:>12} {output:>12}")
         return
 
     if args.functions:

@@ -10,15 +10,19 @@ from unidiff import PatchSet, UnidiffParseError
 from .OpenAI_API_Costs import OpenAI_API_Costs
 from .db import DB
 from .logger import Logger
+from databases import Database
 
 load_dotenv()
+load_dotenv('ke_process_config.env')
 
 
 async def succeed(d: dict):
     return d
 
 
+
 os_descriptor = platform.platform()
+
 
 
 class AI:
@@ -26,6 +30,16 @@ class AI:
     log_a = Logger(namespace="Assistant", debug=True)
     memory = DB()
     client = None
+    # db = Database | None
+
+    # @classmethod
+    # async def get_deb_descriptor(name: str) -> str:
+    #     url: str = os.getenv(name)
+    #     db: Database = Database(url)
+    #     log = Logger(namespace='DB', debug=True)
+    #     log.info(f"Database Descriptor: {db}")
+    #     await db.connect()
+    #     return f'connected to postgres database... {db}'
 
     def __init__(self, llm_name: str, model: str = "gpt-3.5-turbo-1106",
                  temperature: float = 0, max_tokens: int = 4000,
@@ -47,6 +61,20 @@ class AI:
             's_total': 0.0,
             'elapsed_time': 0.0,
         }
+        self.db: Database = None
+
+
+    async def query_db_ai(self, sql: str, process_name: str):
+
+        if self.db is None:
+            self.db = Database(os.getenv('KE_PROC_DB_URL'))
+            await self.db.connect()
+
+        # self.log.info(f"About to Query Database: {sql}")
+        result = await self.db.fetch_all(query=sql)
+        result_as_dict = [dict(row) for row in result]
+        # self.log.info(f"Query Database Result: {result_as_dict}")
+        return await succeed({'role': 'function', 'name': 'read_file', 'content': str(result_as_dict)})
 
     async def read_file(self, name: str, process_name: str):
 
@@ -247,8 +275,21 @@ class AI:
                 },
                 "required": ["command"],
             },
+        },
+        {
+            "name": "query_db",
+            "description": f"Execute an SQL against psql (PostgreSQL) 14.11 (Ubuntu 14.11-0ubuntu0.22.04.1) database",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "sql": {
+                        "type": "string",
+                        "description": "SQL command to be executed",
+                    },
+                },
+                "required": ["sql"],
+            },
         }
-
     ]
     available_functions = {
         "read_file": read_file,
@@ -256,6 +297,7 @@ class AI:
         # "replace": replace,
         "patch": patch,
         "exec": execute_cmd_ai,
+        "query_db": query_db_ai,
     }
 
     async def generate(self, step, user_messages: list[dict[str, str]], process_name: str):
@@ -346,6 +388,7 @@ class AI:
 
         # self.log.info(f"Calling {self.model} chat with messages: ")
         # self.log.info(messages)
+
         try:
             response = await AI.client.chat.completions.create(
                 messages=messages,

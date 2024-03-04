@@ -2,8 +2,6 @@ Todo: add a .wget local command to access web-pages
 
 Todo: The 'Continue?' prompt with gpt 3.5 turbo does not seam to work...
 
-Todo: Reference of .kepf syntax is required.
-
 Todo: Add routine to update OpenAI_API_Costs.py
 
 Todo: The file create_new_process.py, creates the example process structure.
@@ -15,42 +13,10 @@ Todo: add syntax for .llm, .clear, .include, and .cmd lines
 
 Todo: need a repository for example processes
 
-Todo: Need to make my own description on how to release software to pipy
+Done: Need to make my own description on how to release software to pipy
 
-Done: When using .clear to delete the Code/ Directory an error may appear about .__py_cache__ being a directory.  It
-    seems that the method of deletion does not work for sub-directories...
+Done: New Command "query_db" gives access to databases.
 
-Done: Need new version of ReadMe.md
+Done: Reference of .kepf syntax is required.
 
-Done: '.clear' line parsing and error reporting.
-
-Done: Add a cmd function that the LLm can call, to allow it to execute arbitrary code on my machine
-
-Done: Add operating system to description of execute call
-
-Done: We get line_statement parse errors when AI attempts to read file that contains line starting with '.'
-
-Done: Update command prompt args interface to provide with better help,
-      maybe short-cuts like -exec or even -e
-
-Done: the Create Procedure Routine needs to be updated to new syntax...
-
-Done: Allow '*' wild card in step name
-
-Done: Add a list of 'Models' that can be used in .kepf files
-
-Done: Test the following approach:
-      1- Have LLM generate a prompt and place it in Planning,
-      2- use the Prompt in subsequent step.
-
-Done: Fix relative include problem, allowing for debug to run outside  the current source directories.
-
-Done: add a .cmd line to the line_statement that will allow for execution of arbitrary commands on local machine,
-      and return the result (stdout?).
-
-Done: /home/jerry/PycharmProjects/Knowledge_Engineer/knowledge_engineer/ai.py:47: RuntimeWarning: coroutine 'AsyncModels.retrieve' was never awaited
-        AI.client.models.retrieve(model)
-        RuntimeWarning: Enable tracemalloc to get the object allocation traceback
-        This is line 47:         AI.client.models.retrieve(model)
-        This is used to confirm that the model actually exists....
-
+Done: Eat my own dog food.  Test using it for RealWorld Efforts
