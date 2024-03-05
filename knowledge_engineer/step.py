@@ -22,7 +22,8 @@ class Step:
                  llm_name: str = '',
                  model: str = 'gpt-3.5-turbo-1106',
                  temperature: int = 0,
-                 max_tokens: int = 4000
+                 max_tokens: int = 4000,
+                 response_format=None
                  ):
         self.name: str = name
         self.prompt_name: str | None = prompt_name
@@ -30,10 +31,20 @@ class Step:
         # self.file_process_name: str = file_process_name
         # self.file_glob: str = file_glob
         self.macros: dict[str, str] = macros
+
         if macros is None:
             self.macros = {}
 
-        self.ai: AI = AI(llm_name=llm_name, model=model, max_tokens=max_tokens, temperature=temperature)
+        rf = response_format
+        if response_format:
+            rf = {"type": f"{response_format}"}
+
+        self.ai: AI = AI(llm_name=llm_name,
+                         model=model,
+                         max_tokens=max_tokens,
+                         temperature=temperature,
+                         response_format=rf
+                         )
 
     def update_gui(self):
         # Send Update to the GUI
@@ -70,8 +81,10 @@ class Step:
 
         txt = f'{top_left}Step: {self.pname}:"{self.name}"'
         self.log.info(f"{txt}")
-        self.log.info(
-            f'│ Model: "{self.ai.model}", Temperature: {self.ai.temperature}, Max Tokens: {int(self.ai.max_tokens):,}')
+        txt = f'│ Model: "{self.ai.model}", Temperature: {self.ai.temperature}, Max Tokens: {int(self.ai.max_tokens):,}'
+        if self.ai.response_format:
+            txt += f', Response Format: "{self.ai.response_format["type"]}"'
+        self.log.info(txt)
 
         try:
             # self.ai.messages = messages

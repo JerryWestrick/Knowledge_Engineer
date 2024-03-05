@@ -1,0 +1,17 @@
+.llm "llm_name": "OpenAI", "model": "gpt-4-1106-preview", "max_tokens": 50000, "response_format": "json_object"
+.system
+you are a Database Engineer.
+You analyze databases.
+You respond in JSON
+.user
+Read Schema Information from "Planning/Schema.json", you will be modifying it.
+For each Relationship in the Schema choose a label by filling in the following blank:
+  [Table1] _____ [Table2]
+
+  ex. Seats are at Tables.  label="are at"
+  ex. Students are in Classes, label="are in"
+  ex. Orders are for Customers, label="are for"
+
+  Extend the Schema Relationship information with the label="...",
+  and rewrite the Schema to "Planning/Schema.json" with the "write_file" function.
+.exec

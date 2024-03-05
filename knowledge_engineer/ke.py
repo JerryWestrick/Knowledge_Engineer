@@ -8,6 +8,7 @@ from json import JSONDecodeError
 from pathlib import Path
 
 from dotenv import load_dotenv
+from rich.markdown import Markdown
 
 from knowledge_engineer.OpenAI_API_Costs import OpenAI_API_Costs
 from knowledge_engineer.ai import AI
@@ -15,8 +16,8 @@ from knowledge_engineer.create_new_process import create_new_proc
 from knowledge_engineer.db import DB
 from knowledge_engineer.logger import Logger
 from knowledge_engineer.step import Step
+from knowledge_engineer.version import get_version
 import os
-
 
 log = Logger(namespace="ke", debug=True)
 memory = DB()
@@ -85,7 +86,7 @@ def main():
                                           help="List all steps in the current process")
     execution_control_group = parser.add_argument_group('Execution Control')
     execution_control_group.add_argument("-e", "--execute", action='store_true',
-                                          help="Execute all steps in the current process")
+                                         help="Execute all steps in the current process")
 
     execution_control_group.add_argument("-s", "--step", metavar="name", type=str,
                                          help="Execute the specified step in the process")
@@ -99,6 +100,9 @@ def main():
     information_group.add_argument("-v", "--version", action='store_true',
                                    help="Print the version of Knowlege_Engineer")
 
+    information_group.add_argument("--macros", action='store_true',
+                                   help="Print the values of the Macro Storage")
+
     # Parse the arguments (This line is necessary for the actual argument parsing, but not for generating the help text)
     # args = parser.parse_args()
 
@@ -111,7 +115,7 @@ def main():
 
     if args.models:
         log.info(f" {'LLM':10} {'Generic':15} {'Model':25} {'Max Token'} {'$/k-Tok In':>12} {'$/k-Tok Out':>12}")
-        log.info(f" {'-' * 10} {'-' * 15} {'-'*25} {'-'*10} {'-'*12} {'-'*12} ")
+        log.info(f" {'-' * 10} {'-' * 15} {'-' * 25} {'-' * 10} {'-' * 12} {'-' * 12} ")
 
         keys: list[str] = list(OpenAI_API_Costs.keys())
         keys.sort()
@@ -122,8 +126,7 @@ def main():
             input = f"{v['input']:06.4f}"
             output = f"{v['output']:06.4f}"
             llm = '"OpenAI"'
-            log.info(f" {llm:10} {generic:15} { model :25} {v['context']:>10,} {input:>12} {output:>12}")
-        return
+            log.info(f" {llm:10} {generic:15} {model :25} {v['context']:>10,} {input:>12} {output:>12}")
 
     if args.functions:
         log.info(f" {'Function':45} {'Description':50}")
@@ -138,13 +141,20 @@ def main():
                 parm_str += ', ' + pname + ': ' + ptype
             func_str = f"{func['name']}({parm_str[2:]})"
             log.info(f" {func_str:45} \"{func['description']}\"")
-        return
 
     if args.version:
-        import importlib.metadata
-        package_name = __name__.split('.')[0]
-        version = importlib.metadata.version(package_name)
-        log.info(f" {package_name} version: {version}")
+        ver: dict[str, str] = get_version()
+        version_str: str = f"{ver['Name']}: {ver['Version']} \n"
+        log.info(f" {version_str}")
+
+    if args.macros:
+        ver: dict[str, str] = get_version()
+        version_str: str = ""
+        for k, v in ver.items():
+            version_str += f"{k}: {v}\n"
+        log.info(f" {version_str}")
+
+    if args.models or args.functions or args.version or args.macros:
         return
 
     asyncio.run(run_ke(args))
@@ -200,7 +210,7 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
         try:
             dirs = json.loads(json_str)
         except JSONDecodeError as err:
-            log.error(f"Error parsing .clear line: {err.msg}\n.clear {json_str[2:-2]}\n{'-'*(err.pos+5)}^")
+            log.error(f"Error parsing .clear line: {err.msg}\n.clear {json_str[2:-2]}\n{'-' * (err.pos + 5)}^")
             exit(2)
 
         log.info(f"Clearing {dirs}")

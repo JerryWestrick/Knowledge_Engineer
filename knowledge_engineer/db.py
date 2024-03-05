@@ -1,3 +1,4 @@
+import datetime
 import os
 import shutil
 import traceback
@@ -7,10 +8,10 @@ import glob
 
 from .line_statement import Compiler
 from .logger import Logger
+from .version import get_version
 
 
 # This class represents a simple database that stores its data as files in a directory hierarchy.
-
 
 class DB:
     """
@@ -41,7 +42,7 @@ class DB:
     # this is used to replace macro names in the contents of the files
     # macro syntax is '${macro_name}$ i.e. ${version}$ will be replaced with the version number defined below'
     # macro is set to a shallow copy of the variables of each step before step execution.
-    macro: dict[str, str] = {'version': '1.0'}
+    macro: dict[str, str] = get_version()
 
     _instance = None
 

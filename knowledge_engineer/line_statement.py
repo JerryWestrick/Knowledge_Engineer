@@ -49,7 +49,7 @@ LineStatement_Grammar = r"""
 
 class MyTransformer(Transformer):
     # Class Variables
-    log = Logger(namespace="MyTransformer", debug=True)
+    log = Logger(namespace="MyTransformer", debug=False)
 
     @staticmethod
     def start(statements):
@@ -58,72 +58,72 @@ class MyTransformer(Transformer):
 
     @staticmethod
     def statement(statement):
-        # MyTransformer.log('LARK', f"statement({statement})")
+        MyTransformer.log('LARK', f"statement({statement})")
         return statement
 
     @staticmethod
     def role_statement(statement):
-        # MyTransformer.log.info("role_statement({statement})", statement=statement)
+        MyTransformer.log.info(f"role_statement({statement})")
         return {'statement': 'set_role', 'role': statement[0].data}
 
     @staticmethod
     def role_name(statement):
-        # MyTransformer.log.info(f"role_name({statement})")
+        MyTransformer.log.info(f"role_name({statement})")
         return statement[0].data
 
     @staticmethod
     def include_statement(statement):
-        # MyTransformer.log.info(f"include_statement({statement})")
+        MyTransformer.log.info(f"include_statement({statement})")
         return {'statement': 'include_statement', 'name': statement[0].strip()}
 
     @staticmethod
     def llm_statement(statement):
-        # MyTransformer.log.info(f"llm_statement({statement})")
+        MyTransformer.log.info(f"llm_statement({statement})")
         return {'statement': 'llm_statement', 'parms': statement[0].strip()}
 
     @staticmethod
     def clear_statement(statement):
-        # MyTransformer.log.info(f"llm_statement({statement})")
+        MyTransformer.log.info(f"clear_statement({statement})")
         return {'statement': 'clear_statement', 'parms': statement[0].strip()}
 
     @staticmethod
     def cmd_statement(statement):
-        # MyTransformer.log.info(f"llm_statement({statement})")
+        MyTransformer.log.info(f"cmd_statement({statement})")
         return {'statement': 'cmd_statement', 'parms': statement[0].strip()}
 
     @staticmethod
     def text_block_statement(statement):
-        # MyTransformer.log.info(f"text_block_statement({statement})")
+        MyTransformer.log.info(f"text_block_statement({statement})")
         return {'statement': 'text_block_statement', 'name': statement[0].strip()}
 
     @staticmethod
     def exec_statement(statement):
-        # MyTransformer.log.info(f"exec_statement({statement})")
+        MyTransformer.log.info(f"exec_statement({statement})")
         return {'statement': 'exec_statement'}
 
     @staticmethod
     def rest_of_line(statement):
-        # MyTransformer.log.info(f"rest_of_line({statement})")
+        MyTransformer.log.info(f"rest_of_line({statement})")
         return statement[0]
 
     @staticmethod
     def VAR(statement):
-        # MyTransformer.log.info(f"VAR({statement})")
+        MyTransformer.log.info(f"VAR({statement})")
         return statement
 
     @staticmethod
     def ENDOFLINE(statement):
-        # MyTransformer.log.info(f"ENDOFLINE({statement})")
+        MyTransformer.log.info(f"ENDOFLINE({statement})")
         return statement.value
 
     @staticmethod
     def MEMORY_NAME(statement):
-        # MyTransformer.log.info(f"MEMORY_NAME({statement})")
+        MyTransformer.log.info(f"MEMORY_NAME({statement})")
         return statement
 
     @staticmethod
     def DOT(statement):
-        # MyTransformer.log.info(f"DOT({statement})")
+        MyTransformer.log.info(f"DOT({statement})")
         return statement
 
 

@@ -1,12 +1,11 @@
-.llm "llm_name": "OpenAI", "model": "gpt-4-1106-preview", "max_tokens": 50000
+.llm "llm_name": "OpenAI", "model": "gpt-4-1106-preview", "max_tokens": 50000, "response_format": "json_object"
 .clear "Planning/*", "Code/*", "Logs/*"
 .system
 you are a Database Engineer.
 You analyze databases.
+You respond in JSON
 .user
 Using the "query_db" function to gather information about the tables, columns, and relationships in the database.
-Write "Planning/Schema.md" with:
- - a markdown table for each table in the database
-     - List of all Columns in each table with their data types
-     - a list of all relationships to other tables
+Ignore the users table, and the views.
+Write Schema Information into "Planning/Schema.json".
 .exec

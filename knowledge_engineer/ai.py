@@ -43,14 +43,14 @@ class AI:
 
     def __init__(self, llm_name: str, model: str = "gpt-3.5-turbo-1106",
                  temperature: float = 0, max_tokens: int = 4000,
-                 mode: str = 'complete'):
+                 mode: str = 'complete', response_format=None):
         self.llm_name: str = llm_name
         self.temperature: float = temperature
         self.max_tokens: int = max_tokens
         self.model: str = model
         self.mode: str = mode
         self.messages = []
-        self.messages = []
+        self.response_format = response_format
         self.files = {}
         self.e_stats = {
             'prompt_tokens': 0.0,
@@ -382,6 +382,11 @@ class AI:
         self.e_stats['s_total'] = self.e_stats['sp_cost'] + self.e_stats['sc_cost']
         self.log.stop_step(step)
 
+        # Close DB Pool
+        if self.db:
+            await self.db.disconnect()
+            self.db = None
+
         return self.answer
 
     async def chat(self, messages: list[dict[str, str]]):
@@ -395,7 +400,8 @@ class AI:
                 model=self.model,
                 temperature=self.temperature,
                 functions=self.functions,
-                function_call="auto")
+                function_call="auto",
+                response_format=self.response_format)
             # messages = messages,
             # model = self.model,
             # temperature = self.temperature,
