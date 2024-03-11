@@ -1,2 +1,1 @@
-/test/rs/ke_process_config.env
-/test/s99/ke_process_config.env
+/test/*/ke_process_config.env

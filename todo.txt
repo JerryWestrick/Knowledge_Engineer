@@ -21,7 +21,15 @@ Todo: add [05:54:56.354]      Step::╭─ Step: rs:"Prompts/2- Create Relations
           [05:54:56.355]      Step::│ Model: "gpt-4-1106-preview", Temperature: 0, Max Tokens: 50,000, Response Format: "json_object"
       To the log files.
 
-Todo: Have problem with macro replacement.  Seams to fail though I donot know exactly when.
+Todo: Have problem with macro replacement.  Seams to fail though I do not know exactly when.
+
+Todo: add Process information to macros... Like rs and a version number.
+
+Todo: Documentation for macros
+
+Done: Add mistral.ai to the list of AI models
+
+Todo: Error in --step=99*  if there is no matching file...  Need to add a check for this.
 
 Done: get_version is implemented twice: once in ke.py and once db.py. This is to avoid circular imports.  Need to fix this.
 

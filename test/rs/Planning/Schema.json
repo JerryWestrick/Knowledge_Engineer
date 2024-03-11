@@ -1,1 +1,298 @@
-{"tables":[{"name":"menu_h1","columns":[{"name":"id","type":"integer","nullable":false},{"name":"name","type":"text","nullable":false}],"relationships":[]},{"name":"menu_h2","columns":[{"name":"id","type":"integer","nullable":false},{"name":"menu_h1_id","type":"integer","nullable":false},{"name":"menu_h1_no","type":"integer","nullable":false},{"name":"name","type":"text","nullable":false}],"relationships":[{"column":"menu_h1_id","references":"menu_h1(id)","label":"belong to"}]},{"name":"menu_items","columns":[{"name":"id","type":"integer","nullable":false},{"name":"menu_h2_id","type":"integer","nullable":false},{"name":"menu_h2_no","type":"integer","nullable":false},{"name":"name","type":"text","nullable":false},{"name":"description","type":"text","nullable":false},{"name":"price","type":"double precision","nullable":false},{"name":"quantity","type":"integer","nullable":false}],"relationships":[{"column":"menu_h2_id","references":"menu_h2(id)","label":"are under"}]},{"name":"tables","columns":[{"name":"id","type":"integer","nullable":false},{"name":"name","type":"text","nullable":false},{"name":"default_seats","type":"integer","nullable":false},{"name":"order_id","type":"integer","nullable":true}],"relationships":[]},{"name":"seats","columns":[{"name":"id","type":"integer","nullable":false},{"name":"table_id","type":"integer","nullable":false},{"name":"name","type":"text","nullable":false}],"relationships":[{"column":"table_id","references":"tables(id)","label":"are at"}]},{"name":"orders","columns":[{"name":"id","type":"integer","nullable":false},{"name":"table_id","type":"integer","nullable":false},{"name":"open_time","type":"timestamp with time zone","nullable":false},{"name":"state","type":"text","nullable":false}],"relationships":[{"column":"table_id","references":"tables(id)","label":"are for"}]},{"name":"order_items","columns":[{"name":"id","type":"integer","nullable":false},{"name":"order_id","type":"integer","nullable":false},{"name":"seat_id","type":"integer","nullable":false},{"name":"menu_item_id","type":"integer","nullable":false},{"name":"quantity","type":"integer","nullable":false}],"relationships":[{"column":"order_id","references":"orders(id)","label":"are part of"},{"column":"seat_id","references":"seats(id)","label":"are assigned to"},{"column":"menu_item_id","references":"menu_items(id)","label":"include"}]},{"name":"order_item_alterations","columns":[{"name":"id","type":"integer","nullable":false},{"name":"order_item_id","type":"integer","nullable":false},{"name":"alteration","type":"text","nullable":false}],"relationships":[{"column":"order_item_id","references":"order_items(id)","label":"modify"}]}]}
+{
+  "tables": [
+    {
+      "name": "menu_h1",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('menu_h1_id_seq'::regclass)"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": null
+        }
+      ],
+      "relationships": []
+    },
+    {
+      "name": "menu_h2",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('menu_h2_id_seq'::regclass)"
+        },
+        {
+          "name": "menu_h1_id",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "menu_h1_no",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": null
+        }
+      ],
+      "relationships": [
+        {
+          "column": "menu_h1_id",
+          "foreign_table": "menu_h1",
+          "foreign_column": "id",
+          "label": "belongs to"
+        }
+      ]
+    },
+    {
+      "name": "menu_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('menu_items_id_seq'::regclass)"
+        },
+        {
+          "name": "menu_h2_id",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "menu_h2_no",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "price",
+          "type": "double precision",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "nullable": false,
+          "default": "0"
+        }
+      ],
+      "relationships": [
+        {
+          "column": "menu_h2_id",
+          "foreign_table": "menu_h2",
+          "foreign_column": "id",
+          "label": "is part of"
+        }
+      ]
+    },
+    {
+      "name": "tables",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('tables_id_seq'::regclass)"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "default_seats",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "order_id",
+          "type": "integer",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "relationships": []
+    },
+    {
+      "name": "seats",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('seats_id_seq'::regclass)"
+        },
+        {
+          "name": "table_id",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": false,
+          "default": null
+        }
+      ],
+      "relationships": [
+        {
+          "column": "table_id",
+          "foreign_table": "tables",
+          "foreign_column": "id",
+          "label": "are at"
+        }
+      ]
+    },
+    {
+      "name": "orders",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('orders_id_seq'::regclass)"
+        },
+        {
+          "name": "table_id",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "open_time",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "default": "'Open'::text"
+        }
+      ],
+      "relationships": [
+        {
+          "column": "table_id",
+          "foreign_table": "tables",
+          "foreign_column": "id",
+          "label": "are placed at"
+        }
+      ]
+    },
+    {
+      "name": "order_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('order_item_id_seq'::regclass)"
+        },
+        {
+          "name": "order_id",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "seat_id",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "menu_item_id",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "nullable": false,
+          "default": "1"
+        }
+      ],
+      "relationships": [
+        {
+          "column": "order_id",
+          "foreign_table": "orders",
+          "foreign_column": "id",
+          "label": "are included in"
+        },
+        {
+          "column": "seat_id",
+          "foreign_table": "seats",
+          "foreign_column": "id",
+          "label": "are for"
+        },
+        {
+          "column": "menu_item_id",
+          "foreign_table": "menu_items",
+          "foreign_column": "id",
+          "label": "consist of"
+        }
+      ]
+    },
+    {
+      "name": "order_item_alterations",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('order_item_alterations_id_seq'::regclass)"
+        },
+        {
+          "name": "order_item_id",
+          "type": "integer",
+          "nullable": false,
+          "default": null
+        },
+        {
+          "name": "alteration",
+          "type": "text",
+          "nullable": false,
+          "default": null
+        }
+      ],
+      "relationships": [
+        {
+          "column": "order_item_id",
+          "foreign_table": "order_items",
+          "foreign_column": "id",
+          "label": "modify"
+        }
+      ]
+    }
+  ]
+}

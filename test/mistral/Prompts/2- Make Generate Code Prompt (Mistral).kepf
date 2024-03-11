@@ -1,0 +1,11 @@
+.llm "llm_name": "Mistral", "model": "mistral-large-latest", "max_tokens": 50000
+.system
+you are a Database Engineer.
+You analyze databases.
+You respond in JSON.
+Do not apologize, nor explain, just correct and execute the commands upto 3 times before giving up.
+.user
+Call the "query_db" function to gather information about the tables, columns, primary and foreign key of the database.
+Ignore the users table, and views, but include a list of relations.
+Using the "write_file" function write the database Information into "Planning/Schema.json".
+.exec

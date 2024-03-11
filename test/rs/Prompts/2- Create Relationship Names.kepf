@@ -8,7 +8,7 @@ Read Schema Information from "Planning/Schema.json", you will be modifying it.
 For each Relationship in the Schema choose a label by filling in the following blank:
   [Table1] _____ [Table2]
 
-  ex. Seats are at Tables.  label="are at"
+  ex. Beds are in Bedrooms.  label="are in"
   ex. Students are in Classes, label="are in"
   ex. Orders are for Customers, label="are for"
 

@@ -14,9 +14,6 @@ class Step:
     def __init__(self,
                  name: str,
                  prompt_name: str | None = None,
-                 # file_process_enabled: bool = False,
-                 # file_process_name: str = '',
-                 # file_glob: str = '',
                  macros: dict[str, str] = None,
                  # AI params
                  llm_name: str = '',
@@ -27,9 +24,6 @@ class Step:
                  ):
         self.name: str = name
         self.prompt_name: str | None = prompt_name
-        # self.file_process_enabled: bool = file_process_enabled
-        # self.file_process_name: str = file_process_name
-        # self.file_glob: str = file_glob
         self.macros: dict[str, str] = macros
 
         if macros is None:

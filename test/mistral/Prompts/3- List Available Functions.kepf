@@ -1,0 +1,4 @@
+.llm "llm_name": "Mistral", "model": "mistral-large-latest", "max_tokens": 50000
+.user
+Please describe available functions.
+.exec

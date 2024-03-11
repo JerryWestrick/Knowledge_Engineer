@@ -1,17 +1,17 @@
-.llm "llm_name": "OpenAI", "model": "gpt-4-1106-preview", "max_tokens": 50000
+.llm "llm_name": "Mistral", "model": "mistral-large-latest", "max_tokens": 50000
 .system
 you are a Database Engineer.
 You analyze databases.
 You will be drawing Entity Relationship Diagrams (ERD) using graphviz Dot.
 You will use A4 Landscape as the canvas size.
-
 .user
 Here is a Schema to be analyzed.
 ```json
 .include Planning/Schema.json
 ```
 
-Draw an ERD of the schema to "Planning/Erd.dot".
+Draw an ERD of the schema to "Planning/Erd.dot" Using the function "write_file".
+```dot
 
 use the following style for the ERD:
 ```dot

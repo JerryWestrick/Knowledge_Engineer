@@ -50,7 +50,12 @@ Base_Dir: dict[str, str] = {
     'ke_process_config.env':
         """KE_PROC_DIR_PROMPTS='Prompts'
 KE_PROC_DIR_LOGS='Logs'
-OPENAI_API_KEY='<Your Open API Key>'
+OPENAI_API_KEY='Your Open AI API Key'
+MISTRAL_API_KEY='Your Mistral API Key'
+KE_PROC_DB_URL="postgresql+aiopg://user:password@localhost/database"
+# PostgreSQL: "postgresql://user:password@localhost/dbname"
+# MySQL: "mysql://user:password@localhost/dbname"
+# SQLite: "sqlite:///path/to/dbfile"
 """,
 
 }

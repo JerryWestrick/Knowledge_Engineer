@@ -1,5 +1,7 @@
 import json
 import weakref
+
+from mistralai.models.chat_completion import ChatMessage
 # from typing import Optional
 
 # from pydantic_core import from_json
@@ -60,14 +62,27 @@ class Logger:
         self.p(f"{self.ts()}{head}[medium_orchid]{msg['role'] + ' message':>14}[/] [green]{content}[/]")
 
     def ai_msg(self, step, msg: dict):
-        content = [f"{msg['content']}"]
+
+        msg_dict = msg
+        if isinstance(msg, ChatMessage):
+            msg_dict = msg_dict.dict()
+
+        content = [f"{msg_dict['content']}"]
 
         head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
 
-        if 'function_call' in msg.keys():
-            arg_str = msg['function_call']['arguments']
+        func_name = ''
+        arg_str = ''
+        if 'function_call' in msg_dict.keys() :
+            func_name = msg_dict['function_call']['name']
+            arg_str = msg_dict['function_call']['arguments']
+
+        elif 'tool_calls' in msg_dict.keys() and msg_dict['tool_calls']:
+            func_name = msg_dict['tool_calls'][0]['function']['name']
+            arg_str = msg_dict['tool_calls'][0]['function']['arguments']
+
+        if func_name:
             args = json.loads(arg_str)
-            func_name = msg['function_call']['name']
             fn = f"[deep_sky_blue1]{func_name:>14}[/]"
             if func_name == 'read_file':
                 self.p(f"{self.ts()}{head}{fn} ({args['name']})")

@@ -10,7 +10,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from rich.markdown import Markdown
 
-from knowledge_engineer.OpenAI_API_Costs import OpenAI_API_Costs
+from knowledge_engineer.AI_API_Costs import AI_API_Costs
 from knowledge_engineer.ai import AI
 from knowledge_engineer.create_new_process import create_new_proc
 from knowledge_engineer.db import DB
@@ -114,19 +114,18 @@ def main():
         return
 
     if args.models:
-        log.info(f" {'LLM':10} {'Generic':15} {'Model':25} {'Max Token'} {'$/k-Tok In':>12} {'$/k-Tok Out':>12}")
-        log.info(f" {'-' * 10} {'-' * 15} {'-' * 25} {'-' * 10} {'-' * 12} {'-' * 12} ")
+        log.info(f" {'LLM':10} {'Model':25} {'Max Token'} {'$/m-Tok In':>12} {'$/m-Tok Out':>12}")
+        log.info(f" {'-' * 10} {'-' * 25} {'-' * 10} {'-' * 12} {'-' * 12} ")
 
-        keys: list[str] = list(OpenAI_API_Costs.keys())
+        keys: list[str] = list(AI_API_Costs.keys())
         keys.sort()
         for k in keys:
-            v = OpenAI_API_Costs.get(k)
+            v = AI_API_Costs.get(k)
             model = '"' + v['model'] + '"'
-            generic = '"' + v['generic'] + '"'
-            input = f"{v['input']:06.4f}"
-            output = f"{v['output']:06.4f}"
-            llm = '"OpenAI"'
-            log.info(f" {llm:10} {generic:15} {model :25} {v['context']:>10,} {input:>12} {output:>12}")
+            input = f"{v['input']*1000:06.4f}"
+            output = f"{v['output']*1000:06.4f}"
+            llm = f'"{v["llm"]}"'
+            log.info(f" {llm:10} {model :25} {v['context']:>10,} {input:>12} {output:>12}")
 
     if args.functions:
         log.info(f" {'Function':45} {'Description':50}")
@@ -183,7 +182,7 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
         log.error(f"Error in Prompt self.memory[{prompt_name}] {err}")
         raise
 
-    # Get the LLM Definition off of list on messages
+    # Get the LLM Definition off top of list on messages
     json_str = '{' + messages.pop(0)['content'] + '}'
     try:
         step_parameters = json.loads(json_str)
