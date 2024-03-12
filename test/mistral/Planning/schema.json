@@ -1,0 +1,323 @@
+{
+  "tables": [
+    {
+      "name": "menu_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "menu_h2_no",
+          "type": "integer"
+        },
+        {
+          "name": "price",
+          "type": "double precision"
+        },
+        {
+          "name": "quantity",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "order_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer"
+        },
+        {
+          "name": "order_id",
+          "type": "integer"
+        },
+        {
+          "name": "seat_id",
+          "type": "integer"
+        },
+        {
+          "name": "menu_item_id",
+          "type": "integer"
+        },
+        {
+          "name": "quantity",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "order_item_alterations",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer"
+        },
+        {
+          "name": "order_item_id",
+          "type": "integer"
+        },
+        {
+          "name": "alteration",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "menu_h1_h2_items",
+      "columns": [
+        {
+          "name": "h1_id",
+          "type": "integer"
+        },
+        {
+          "name": "h2_id",
+          "type": "integer"
+        },
+        {
+          "name": "h1_no",
+          "type": "integer"
+        },
+        {
+          "name": "id",
+          "type": "integer"
+        },
+        {
+          "name": "menu_h2_id",
+          "type": "integer"
+        },
+        {
+          "name": "menu_h2_no",
+          "type": "integer"
+        },
+        {
+          "name": "price",
+          "type": "double precision"
+        },
+        {
+          "name": "quantity",
+          "type": "integer"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "h1_name",
+          "type": "text"
+        },
+        {
+          "name": "h2_name",
+          "type": "text"
+        },
+        {
+          "name": "description",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "tables",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer"
+        },
+        {
+          "name": "default_seats",
+          "type": "integer"
+        },
+        {
+          "name": "order_id",
+          "type": "integer"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "menu_h2",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer"
+        },
+        {
+          "name": "menu_h1_id",
+          "type": "integer"
+        },
+        {
+          "name": "menu_h1_no",
+          "type": "integer"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer"
+        },
+        {
+          "name": "last_login",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "email",
+          "type": "text"
+        },
+        {
+          "name": "password",
+          "type": "text"
+        },
+        {
+          "name": "role",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "seats",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer"
+        },
+        {
+          "name": "table_id",
+          "type": "integer"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "orders",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer"
+        },
+        {
+          "name": "open_time",
+          "type": "timestamp with time zone"
+        },
+        {
+          "name": "table_id",
+          "type": "integer"
+        },
+        {
+          "name": "state",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "menu_h1",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "foreign_keys": [
+    {
+      "menu_h2_belongs_to_menu_h1_fk": {
+        "table": "menu_h2",
+        "column": "menu_h1_id",
+        "references": {
+          "table": "menu_h1",
+          "column": "id"
+        }
+      }
+    },
+    {
+      "menu_items_belongs_to_Manu_h2_fk": {
+        "table": "menu_items",
+        "column": "menu_h2_id",
+        "references": {
+          "table": "menu_h2",
+          "column": "id"
+        }
+      }
+    },
+    {
+      "seats_belongs_to_tables_fk": {
+        "table": "seats",
+        "column": "table_id",
+        "references": {
+          "table": "tables",
+          "column": "id"
+        }
+      }
+    },
+    {
+      "orders_belong_to_table_fk": {
+        "table": "orders",
+        "column": "table_id",
+        "references": {
+          "table": "tables",
+          "column": "id"
+        }
+      }
+    },
+    {
+      "order_item_belongs_to_order_fk": {
+        "table": "order_items",
+        "column": "order_id",
+        "references": {
+          "table": "orders",
+          "column": "id"
+        }
+      }
+    },
+    {
+      "order_item_belongs_to_seat_fk": {
+        "table": "order_items",
+        "column": "seat_id",
+        "references": {
+          "table": "seats",
+          "column": "id"
+        }
+      }
+    },
+    {
+      "order_item_is_a_menu_item_fk": {
+        "table": "order_items",
+        "column": "menu_item_id",
+        "references": {
+          "table": "menu_items",
+          "column": "id"
+        }
+      }
+    },
+    {
+      "order_item_alterations_belongs_to_order_items_fk": {
+        "table": "order_item_alterations",
+        "column": "order_item_id",
+        "references": {
+          "table": "order_items",
+          "column": "id"
+        }
+      }
+    }
+  ]
