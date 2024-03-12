@@ -28,7 +28,6 @@ class AI:
     log = Logger(namespace='AI', debug=True)
     log_a = Logger(namespace="Assistant", debug=True)
     memory = DB()
-    client = None
 
     def __init__(self, llm_name: str, model: str = "gpt-3.5-turbo-1106",
                  temperature: float = 0, max_tokens: int = 4000,
@@ -53,9 +52,10 @@ class AI:
             'elapsed_time': 0.0,
         }
         self.db: Database | None = None
+        self.client = None
 
     def function_role(self) -> str:
-        if self.llm_name.lower() == 'Mistral':
+        if self.llm_name.lower() == 'mistral':
             return 'tool'
         return 'function'
 
@@ -210,14 +210,14 @@ class AI:
         self.answer = f'Log of Step: {step.name} : {step.prompt_name}\n'
         pricing = AI_API_Costs[self.model]
 
-        if AI.client is None:
-            if self.llm_name == 'OpenAI':
-                AI.client = AsyncOpenAI()
-                AI.client.api_key = os.getenv('OPENAI_API_KEY')
+        if self.client is None:
+            if self.llm_name.lower() == 'openai':
+                self.client = AsyncOpenAI()
+                self.client.api_key = os.getenv('OPENAI_API_KEY')
 
-            elif self.llm_name == 'Mistral':
+            elif self.llm_name.lower() == 'mistral':
                 api_key = os.getenv('MISTRAL_API_KEY')
-                AI.client = MistralAsyncClient(api_key=api_key)
+                self.client = MistralAsyncClient(api_key=api_key)
 
             else:
                 raise ValueError(f"Unknown LLM: {self.llm_name}")
@@ -277,7 +277,7 @@ class AI:
 
     async def chat_openai(self, messages: list[dict[str, str]], step, process_name):
         try:
-            response = await AI.client.chat.completions.create(
+            response = await self.client.chat.completions.create(
                 messages=messages,
                 model=self.model,
                 temperature=self.temperature,
@@ -330,54 +330,56 @@ class AI:
     async def chat_mistral(self, messages: list[dict[str, str]], step, process_name):
         if self.tools is None:
             self.tools = [{"type": "function", "function": x} for x in self.functions]
-        try:
-            response = await AI.client.chat(
-                model=self.model,
-                messages=messages,
-                tools=self.tools,
-                tool_choice="auto",
-                response_format=self.response_format,
-            )
-        except Exception as err:
-            err_msg = f"Call to Mistral returned error: {err} ai.py line: {err.__traceback__.tb_lineno}"
-            self.log.error(err_msg)
-            response = {'role': 'system', 'error': err_msg}
-            # raise
-        response_message = response.choices[0].message
-        repeat = False
-        function_name = None
-        function_args = None
-        if response.choices[0].finish_reason == 'tool_calls':
-            function_call = response.choices[0].message.tool_calls[0].function
-            function_name = function_call.name
-            function_args = json.loads(function_call.arguments)
+        repeat = True
+        while repeat:
+            repeat = False
+            # Call Mistral
+            try:
+                response = await self.client.chat(
+                    model=self.model,
+                    messages=messages,
+                    tools=self.tools,
+                    tool_choice="auto",
+                    response_format=self.response_format,
+                )
+            except Exception as err:
+                err_msg = f"Call to Mistral returned error: {err} ai.py line: {err.__traceback__.tb_lineno}"
+                self.log.error(err_msg)
+                response = {'role': 'system', 'error': err_msg}
+                raise Exception(err_msg)
+
             response_message = response.choices[0].message
-        else:
-            self.answer = f"{self.answer}\n\n - {response_message.content}"
-
-        self.messages.append(response_message)
-        self.log.ai_msg(step, response_message)  # Display with last message
-        if function_name:
-            new_msg = await self.available_functions[function_name](self, **function_args,
-                                                                    process_name=process_name)
-            self.messages.append(self.make_msg(new_msg))
-            self.log.ret_msg(step, new_msg)
-            repeat = True
-        else:
-            if response_message.content and response_message.content.lower().endswith("if you want to proceed?"):
+            self.messages.append(response_message)
+            function_name = None
+            function_args = None
+            if response.choices[0].finish_reason == 'tool_calls':
+                for tool_call in response_message.tool_calls:
+                    function_call = tool_call.function
+                    function_name = function_call.name
+                    function_args = json.loads(function_call.arguments)
+                    self.log.ai_tool_call(step, tool_call)
+                    rtn = self.available_functions[function_name]
+                    new_msg = await rtn(self, **function_args, process_name=process_name)
+                    self.messages.append(ChatMessage(**new_msg))
+                    self.log.ret_msg(step, new_msg)
                 repeat = True
-                msg = {'role': 'user', 'content': 'Proceed.'}
-                self.messages.append(self.make_msg(msg))
-                self.log.umsg(step, msg)
+            else:
+                self.log.ai_msg(step, response_message)
+                self.answer = f"{self.answer}\n\n - {response_message.content}"
+                if response_message.content and response_message.content.lower().endswith("if you want to proceed?"):
+                    repeat = True
+                    msg = {'role': 'user', 'content': 'Proceed.'}
+                    self.messages.append(ChatMessage(**msg))
+                    self.log.umsg(step, msg)
 
-        # Gather Answer
-        self.e_stats['prompt_tokens'] = \
-            self.e_stats['prompt_tokens'] + response.usage.prompt_tokens
-        self.e_stats['completion_tokens'] = \
-            self.e_stats['completion_tokens'] + response.usage.completion_tokens
+            # Gather Answer
+            self.e_stats['prompt_tokens'] = \
+                self.e_stats['prompt_tokens'] + response.usage.prompt_tokens
+            self.e_stats['completion_tokens'] = \
+                self.e_stats['completion_tokens'] + response.usage.completion_tokens
 
-        # AI.log.info(f"{self.model} chat Response")
-        return repeat
+        return False
+
 
     def to_json(self) -> dict:
         return {

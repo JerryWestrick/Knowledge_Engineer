@@ -105,6 +105,31 @@ class Logger:
         else:
             self.p(f"{self.ts()}{head}[deep_sky_blue1]{'AI message':>14}[/] [green]{content}[/]")
 
+    def ai_tool_call(self, step, tool):
+
+        head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
+
+        func_name = tool.function.name
+        arg_str = tool.function.arguments
+
+        args = json.loads(arg_str)
+        fn = f"[deep_sky_blue1]{func_name:>14}[/]"
+
+        func_name_actions = {
+            'read_file': lambda: self.p(f"{self.ts()}{head}{fn} ({args['name']})"),
+            'write_file': lambda: self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]"),
+            'replace': lambda: self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]"),
+            'patch': lambda: [self.p(f"{self.ts()}{head}{fn} ({line}, ...)[green]{line[:2]}[/]") for line in
+                              args['patch_commands'].split('\n')],
+            'exec': lambda: [self.p(f"{self.ts()}{head}{fn} ({line}, ...)[green]{line[:2]}[/]") for line in
+                             args['command'].split('\n')],
+            'query_db': lambda: [self.p(f"{self.ts()}{head}{fn} ({line}, ...)[green]{line[:2]}[/]") for line in
+                                 args['sql'].split('\n')]
+        }
+
+        func_name_actions.get(func_name,
+                              lambda: self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]"))()
+
     def ret_msg(self, step, msg: dict):
         hcolor = 'green'
         role = msg['role']

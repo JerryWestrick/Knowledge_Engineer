@@ -1,8 +1,8 @@
 rich
 openai
+
 python-dotenv
 lark
-unidiff
 
 databases
 knowledge_engineer

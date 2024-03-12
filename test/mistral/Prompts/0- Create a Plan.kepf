@@ -1,0 +1,40 @@
+.llm "llm_name": "Mistral", "model": "mistral-large-latest", "max_tokens": 50000
+.clear "Code/*", "Planning/*", "Logs/*"
+.system
+You are a database administrator.
+you use the provided functions to interact with the database and the file system.
+DO NOT EXPLAIN YOURSELF.  JUST DO IT.
+.user
+Retrieve all the columns in the 'public' database.
+Retrieve all the tables_constraints of constraint_type "FOREIGN KEY" in the 'public' database.
+Write the schema to "Planning/schema.json" formatted like this:
+```json
+{
+  "tables": [
+    { "name": "users",
+      "columns": [
+        {"name": "id", "type": "integer"},
+        {"name": "name", "type": "text"},
+        ...
+      ]
+    },
+    { "name": "posts",
+      "columns": [
+        {"name": "id", "type": "integer"},
+        {"name": "title", "type": "text"},
+        {"name": "content", "type": "text"},
+        {"name": "user_id", "type": "integer"},
+        ...
+        }
+      ]
+    }
+  ],
+  ...
+  },
+  "foreign_keys": {
+    "posts_belong_to_users_fk": {"table": "posts", "column": "user_id", "references": {"table": "users", "column": "id"}}
+    ...
+  ]
+}
+```
+.exec

@@ -23,13 +23,17 @@ Todo: add [05:54:56.354]      Step::╭─ Step: rs:"Prompts/2- Create Relations
 
 Todo: Have problem with macro replacement.  Seams to fail though I do not know exactly when.
 
-Todo: add Process information to macros... Like rs and a version number.
-
 Todo: Documentation for macros
 
-Done: Add mistral.ai to the list of AI models
-
 Todo: Error in --step=99*  if there is no matching file...  Need to add a check for this.
+
+Todo: Need some sort of "Conversation" mode.  Where the user can see the answers, and decide to say "Continue".
+
+Todo: update the log file as the process runs.
+
+Done: add Process information to macros... Like rs and a version number.
+
+Done: Add mistral.ai to the list of AI models
 
 Done: get_version is implemented twice: once in ke.py and once db.py. This is to avoid circular imports.  Need to fix this.
 
