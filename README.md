@@ -9,6 +9,15 @@ OpenAI GPT Chat is the first to be supported, but the program is designed to be 
 (That is a fancy way to say:  "by modifying the syntax of the **.kepf** files.")
 
 # Quick Start
+### Preparation
+    mkdir ke
+    python -m venv .venv
+
+###### Dos/Windows
+    .venv\Scripts\activate
+###### Linux/MacOS
+    source .venv/bin/activate
+    
 ### Installation
     pip install knowledge-engineer
 

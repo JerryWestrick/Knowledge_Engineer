@@ -1,5 +1,6 @@
 rich
 openai
+mistralai
 
 python-dotenv
 lark
@@ -9,3 +10,6 @@ knowledge_engineer
 
 # Test restaurant
 aiopg
+
+python-dotenv
+rich
