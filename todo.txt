@@ -1,3 +1,9 @@
+Todo: In order to force the LLM into a response that we can better understand/work with,
+      add the response_format = { "type": "json_object" } to the call (both openai and mistral)
+      and add "respond with a json like { cmd=..., description=...}" to the system call...
+      As test with this format worked very well.
+
+
 Todo: add a .wget local command to access web-pages
 
 Todo: The 'Continue?' prompt with gpt 3.5 turbo does not seam to work...
@@ -31,20 +37,3 @@ Todo: Need some sort of "Conversation" mode.  Where the user can see the answers
 
 Todo: update the log file as the process runs.
 
-Done: add Process information to macros... Like rs and a version number.
-
-Done: Add mistral.ai to the list of AI models
-
-Done: get_version is implemented twice: once in ke.py and once db.py. This is to avoid circular imports.  Need to fix this.
-
-Done: Added initial macro values from get_version.
-
-Done: Error in releasing db connection resource:/home/jerry/PycharmProjects/Knowledge_Engineer/venv/lib/python3.10/site-packages/aiopg/pool.py:478: ResourceWarning: Unclosed 1 connections in <aiopg.pool.Pool object at 0x777f9f15bf40>; the pool was released, use await pool.clear() to avoid this warning
-
-Done: Need to make my own description on how to release software to pipy
-
-Done: New Command "query_db" gives access to databases.
-
-Done: Reference of .kepf syntax is required.
-
-Done: Eat my own dog food.  Test using it for RealWorld Efforts

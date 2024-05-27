@@ -2,7 +2,7 @@
 import os
 import time
 
-from .ai import AI
+from .ai import AI, AIException
 from .db import DB
 from .logger import Logger
 
@@ -84,9 +84,10 @@ class Step:
             # self.ai.messages = messages
             self.update_gui()
             ai_response = await self.ai.generate(self, messages, process_name=self.pname)
-        except Exception as err:
-            self.log.error(f"Error in ai.generate: {err}")
-            raise
+        except AIException as err:
+            err_msg = f'Step: {self.pname}:"{self.name}" ai.generate failed'
+            self.log.error(err_msg)
+            raise err
 
         self.update_gui()
 

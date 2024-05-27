@@ -4,7 +4,7 @@ from knowledge_engineer.logger import Logger
 
 New_Process_Prompts: dict[str, str] = {
     # =======================================
-    '1- Make Generate Code Prompt.kepf':
+    '1-MakeRequirements.kepf':
         """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
 .clear "Code/*", "Planning/*", "Logs/*"
 .system

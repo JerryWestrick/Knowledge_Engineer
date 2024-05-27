@@ -2,6 +2,7 @@ import json
 import os
 import platform
 import subprocess
+import sys
 
 from dotenv import load_dotenv
 from mistralai.async_client import MistralAsyncClient
@@ -13,6 +14,8 @@ from .db import DB
 from .logger import Logger
 from databases import Database
 
+import traceback
+
 load_dotenv()
 load_dotenv('ke_process_config.env')
 
@@ -22,6 +25,18 @@ async def succeed(d: dict):
 
 
 os_descriptor = platform.platform()
+
+
+def make_error_msg(err: Exception):
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    filename = traceback.extract_tb(exc_traceback, limit=1)[0][0]  # Gets filename
+    line_number = traceback.extract_tb(exc_traceback, limit=1)[0][1]  # Gets line number
+    return f'{err} At {filename}::{line_number}'
+
+
+
+class AIException(Exception):
+    pass
 
 
 class AI:
@@ -66,16 +81,21 @@ class AI:
             await self.db.connect()
 
         # self.log.info(f"About to Query Database: {sql}")
-        try:
-            result = await self.db.fetch_all(query=sql)
-        except Exception as err:
-            self.log.error(f"{err}")
-            result = [{'error': err}]
-        result_as_dict = [dict(row) for row in result]
-        # self.log.info(f"Query Database Result: {result_as_dict}")
-        return await succeed({'role': self.function_role(), 'name': 'query_db', 'content': str(result_as_dict)})
+        if sql.lower().startswith('select'):
+            try:
+                result = await self.db.fetch_all(query=sql)
+            except Exception as err:
+                self.log.error(f"{err}")
+                result = [{'error': err}]
+                raise err
+            result_as_dict = [dict(row) for row in result]
+            return await succeed({'role': self.function_role(), 'name': 'query_db', 'content': str(result_as_dict)})
 
-    async def read_file(self, name: str, process_name: str):
+        result = await self.db.execute(query=sql)
+        # self.log.info(f"Database Update Result: {result}")
+        return await succeed({'role': self.function_role(), 'name': 'execute_db', 'content': str(result)})
+
+    async def readfile(self, name: str, process_name: str):
 
         try:
             file_contents = self.memory.read(name, process_name=process_name)
@@ -90,13 +110,14 @@ class AI:
 
         return await succeed({'role': self.function_role(), 'name': 'read_file', 'content': file_contents})
 
-    async def write_file(self, name: str, contents: str, process_name: str):
+    async def writefile(self, name: str, contents: str, process_name: str):
         full_name = name
         try:
             self.memory[full_name] = contents
         except Exception as err:
-            self.log.error(f"Error while writing file for AI... {err}")
-            raise
+            err_msg = f"Error while writing file for AI... {err}"
+            self.log.error(err_msg)
+            raise err
 
         return await succeed({'role': self.function_role(), 'name': 'write_file', 'content': 'Done.'})
 
@@ -129,7 +150,7 @@ class AI:
 
     functions = [
         {
-            "name": "read_file",
+            "name": "readfile",
             "description": "Read the contents of a named file",
             "parameters": {
                 "type": "object",
@@ -143,8 +164,8 @@ class AI:
             },
         },
         {
-            "name": "write_file",
-            "description": "Write the contents to a named file",
+            "name": "writefile",
+            "description": "Write the contents to a named file on the local file system",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -190,8 +211,8 @@ class AI:
         }
     ]
     available_functions = {
-        "read_file": read_file,
-        "write_file": write_file,
+        "readfile": readfile,
+        "writefile": writefile,
         "exec": execute_cmd_ai,
         "query_db": query_db_ai,
     }
@@ -249,6 +270,7 @@ class AI:
                 repeat = False
 
                 step.update_gui()
+
                 repeat = await self.chat(self.messages, step, process_name)
 
         self.e_stats['sp_cost'] = pricing['input'] * (self.e_stats['prompt_tokens'] / 1000.0)
@@ -285,14 +307,18 @@ class AI:
                 function_call="auto",
                 response_format=self.response_format)
         except Exception as err:
-            err_msg = f"Call to ChatGpt returned error: {err}"
+            err_msg = f"OpenAI return error {err}"
             self.log.error(err_msg)
-            response = {'role': 'system', 'error': err_msg}
-            # raise
+            raise err
+
         repeat = False
-        response_message = {'role': response.choices[0].message.role,
-                            'content': response.choices[0].message.content
-                            }
+        try:
+            response_message = {'role': response.choices[0].message.role,
+                                'content': response.choices[0].message.content
+                                }
+        except AttributeError as err:
+            self.log.error(f"OpenAI Response was not usable: {response}\n\nAborting execution")
+            raise err
 
         function_name = None
         function_args = None
@@ -307,8 +333,15 @@ class AI:
         self.messages.append(response_message)
         self.log.ai_msg(step, response_message)  # Display with last message
         if function_name:
-            new_msg = await self.available_functions[function_name](self, **function_args,
-                                                                    process_name=process_name)
+            try:
+                new_msg = await self.available_functions[function_name](self,
+                                                                        **function_args,
+                                                                        process_name=process_name)
+            except Exception as err:
+                err_msg = make_error_msg(err)
+                self.log.error(err_msg)
+                raise err
+
             self.messages.append(self.make_msg(new_msg))
             self.log.ret_msg(step, new_msg)
             repeat = True
@@ -340,13 +373,13 @@ class AI:
                     messages=messages,
                     tools=self.tools,
                     tool_choice="auto",
-                    response_format=self.response_format,
+                    # response_format=self.response_format,
                 )
             except Exception as err:
                 err_msg = f"Call to Mistral returned error: {err} ai.py line: {err.__traceback__.tb_lineno}"
                 self.log.error(err_msg)
                 response = {'role': 'system', 'error': err_msg}
-                raise Exception(err_msg)
+                raise err
 
             response_message = response.choices[0].message
             self.messages.append(response_message)
@@ -379,7 +412,6 @@ class AI:
                 self.e_stats['completion_tokens'] + response.usage.completion_tokens
 
         return False
-
 
     def to_json(self) -> dict:
         return {
