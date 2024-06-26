@@ -1,6 +1,8 @@
 import json
 import weakref
+from typing import Dict
 
+import anthropic.types
 from mistralai.models.chat_completion import ChatMessage
 # from typing import Optional
 
@@ -41,7 +43,6 @@ class Logger:
         if log_file:
             log_file.print(message)
 
-
     def ts(self) -> str:
 
         from datetime import datetime
@@ -61,58 +62,21 @@ class Logger:
         head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
         self.p(f"{self.ts()}{head}[medium_orchid]{msg['role'] + ' message':>14}[/] [green]{content}[/]")
 
-    def ai_msg(self, step, msg: dict):
+    def ai_msg(self, step, content: str, stop_reason: str):
 
-        msg_dict = msg
-        if isinstance(msg, ChatMessage):
-            msg_dict = msg_dict.dict()
+        head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
+        txt = content.replace('\n', '\\n')
+        self.p(f"{self.ts()}{head}[deep_sky_blue1]{'AI ('+stop_reason+')':>14}[/] [green][{txt}][/]")
 
-        content = [f"{msg_dict['content']}"]
+    def ai_tool_call(self, step, func_name: str, arg_str: str):
 
         head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
 
-        func_name = ''
-        arg_str = ''
-        if 'function_call' in msg_dict.keys() :
-            func_name = msg_dict['function_call']['name']
-            arg_str = msg_dict['function_call']['arguments']
-
-        elif 'tool_calls' in msg_dict.keys() and msg_dict['tool_calls']:
-            func_name = msg_dict['tool_calls'][0]['function']['name']
-            arg_str = msg_dict['tool_calls'][0]['function']['arguments']
-
-        if func_name:
+        if isinstance(arg_str, str):
             args = json.loads(arg_str)
-            fn = f"[deep_sky_blue1]{func_name:>14}[/]"
-            if func_name == 'read_file':
-                self.p(f"{self.ts()}{head}{fn} ({args['name']})")
-            elif func_name == 'write_file':
-                self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]")
-            elif func_name == 'replace':
-                self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]")
-            elif func_name == 'patch':
-                lines = args['patch_commands'].split('\n')
-                self.p(f"{self.ts()}{head}{fn} ({lines[0]}, ...)[green]{lines[:2]}[/]")
-            elif func_name == 'exec':
-                lines = args['command'].split('\n')
-                self.p(f"{self.ts()}{head}{fn} ({lines[0]}, ...)[green]{lines[:2]}[/]")
-            elif func_name == 'query_db':
-                lines = args['sql'].split('\n')
-                self.p(f"{self.ts()}{head}{fn} ({lines[0]}, ...)[green]{lines[:2]}[/]")
-            else:
-                self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]")
-
         else:
-            self.p(f"{self.ts()}{head}[deep_sky_blue1]{'AI message':>14}[/] [green]{content}[/]")
+            args = arg_str
 
-    def ai_tool_call(self, step, tool):
-
-        head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
-
-        func_name = tool.function.name
-        arg_str = tool.function.arguments
-
-        args = json.loads(arg_str)
         fn = f"[deep_sky_blue1]{func_name:>14}[/]"
 
         func_name_actions = {
@@ -130,23 +94,24 @@ class Logger:
         func_name_actions.get(func_name,
                               lambda: self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]"))()
 
-    def ret_msg(self, step, msg: dict):
-        hcolor = 'green'
-        role = msg['role']
-        hrole = f"({role:9})"
-        content = [f"{msg['content']}"]
-
+    def ret_msg(self, step, result: Dict[str, str]):
         head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
-
-        self.p(f"{self.ts()}{head}           [medium_orchid]rtn[/] [green]{content}[/]")
+        txt = result['content'].replace('\n', '\\n')
+        self.p(f"{self.ts()}{head}           [medium_orchid]rtn[/] [green]{result['name']}:: {txt}[/]")
 
     def __init__(self, namespace: str, debug: bool = True):
         self.namespace = namespace
         self.debug = debug
         self._instances.add(self)
 
-    def error(self, msg: str):
-        self.p(f"{self.ts()}[on red]{self.namespace:>10}[/on red]::{msg}")
+    def error(self, msg: str, err: Exception):
+        trace_back_msg = '\n'
+        if err:
+            tb = err.__traceback__
+            while tb is not None:
+                trace_back_msg = f"{trace_back_msg} in {tb.tb_frame.f_code.co_filename}, at line {tb.tb_lineno}\n"
+                tb = tb.tb_next
+        self.p(f"{self.ts()}[on red]{self.namespace:>10}[/on red]::{msg}{trace_back_msg}")
 
     def warn(self, msg: str):
         self.p(f"{self.ts()}[bold orange]{self.namespace:>10}::{msg}[/bold orange]")

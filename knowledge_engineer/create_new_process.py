@@ -91,7 +91,7 @@ def create_new_proc(proc_name: str) -> None:
 
     # Check that that directory f"./{proc_name}" does not exist:
     if os.path.exists(f"./{proc_name}"):
-        log.error(f"Proc {proc_name} already exists")
+        log.error(f"Proc {proc_name} already exists", None)
         return
 
     # Create ExampleProcess in f"./{proc_name}"

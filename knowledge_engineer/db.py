@@ -88,6 +88,11 @@ class DB:
         msgs = self.get_messages(key, lines, process_name=process_name)
         return msgs
 
+    def read_lines(self, key: str, process_name: str = ''):
+        content = self.read(key, process_name)
+        lines = content.splitlines()
+        return lines
+
     def read(self, key: str, process_name: str = ''):
 
         # if process_name:
@@ -96,7 +101,7 @@ class DB:
         #     full_path = self.path / key
         full_path = self.path / key
         if not full_path.is_file():
-            self.log.error(f"Invalid Memory Item.  \nPath not found: {full_path}")
+            self.log.error(f"Invalid Memory Item.  \nPath not found: {full_path}", None)
             raise KeyError(key)
         with full_path.open("r", encoding="utf-8") as f:
             # read the file and return the contents
@@ -121,7 +126,7 @@ class DB:
             msgs = self.compiler.execute(code, process_name=process_name)
         except Exception as err:
             tb_str = traceback.format_exc()
-            self.log.error(f"Error {tb_str}")
+            self.log.error(f"Error {tb_str}", err)
             raise
 
         return msgs

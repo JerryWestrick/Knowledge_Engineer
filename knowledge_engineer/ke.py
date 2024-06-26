@@ -7,11 +7,16 @@ import time
 from json import JSONDecodeError
 from pathlib import Path
 
+import sys
+import traceback
+from rich.traceback import install
+
+
 from dotenv import load_dotenv
 from rich.markdown import Markdown
 
 from knowledge_engineer.AI_API_Costs import AI_API_Costs
-from knowledge_engineer.ai import AI
+from knowledge_engineer.ai import AI, AIException
 from knowledge_engineer.create_new_process import create_new_proc
 from knowledge_engineer.db import DB
 from knowledge_engineer.logger import Logger
@@ -19,6 +24,7 @@ from knowledge_engineer.step import Step
 from knowledge_engineer.version import get_version
 import os
 
+install()
 log = Logger(namespace="ke", debug=True)
 memory = DB()
 
@@ -36,12 +42,15 @@ async def execute_process(process_name: str):
         sname = dirs[-1]
         # pname = '/'.join(dirs[:-2])
         # step = Step.from_file(pname, sname)
-        log.info(f'Execute {process_name}({step_no}): "{sname}"')
-        step = await execute_step(process_name, sname)
-        # await step.run(process_name)
-        for k, v in step.ai.e_stats.items():
-            e_stats[k] = e_stats.get(k, 0.0) + v
-        step_no += 1
+        if sname[0] == '_':
+            log.info(f'Skipping step {sname}')
+        else:
+            log.info(f'Execute {process_name}({step_no}): "{sname}"')
+            step = await execute_step(process_name, sname)
+            # await step.run(process_name)
+            for k, v in step.ai.e_stats.items():
+                e_stats[k] = e_stats.get(k, 0.0) + v
+            step_no += 1
 
     e_stats['elapsed_time'] = time.time() - start_time
     mins, secs = divmod(e_stats['elapsed_time'], 60)
@@ -102,6 +111,9 @@ def main():
 
     information_group.add_argument("--macros", action='store_true',
                                    help="Print the values of the Macro Storage")
+
+    debug_group = parser.add_argument_group('debug')
+    debug_group.add_argument("-d", "--debug", action='store_true')
 
     # Parse the arguments (This line is necessary for the actual argument parsing, but not for generating the help text)
     # args = parser.parse_args()
@@ -179,18 +191,27 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
     try:
         messages = memory.read_msgs(prompt_name, process_name=proc_name)
     except Exception as err:
-        log.error(f"Error in Prompt self.memory[{prompt_name}] {err}")
-        raise
+        err_msg = f"Error in Prompt self.memory[{prompt_name}] {err}"
+        log.error(err_msg, err)
+        raise err
 
     # Get the LLM Definition off top of list on messages
-    json_str = '{' + messages.pop(0)['content'] + '}'
+    llm_parms = messages.pop(0)
+    json_str = '{' + llm_parms['content'] + '}'
     try:
         step_parameters = json.loads(json_str)
     except JSONDecodeError as err:
-        log.error(f".llm line syntax error in Prompt {prompt_name}")
-        log.error(f"{json_str}")
-        log.error(f"{err.msg}")
-        exit(2)
+        err_msg = f".llm line syntax error in Prompt {prompt_name}"
+        log.error(err_msg, err)
+        log.error(f"{json_str}", None)
+        log.error(f"{err.msg}", None)
+        raise err
+
+    llm = AI_API_Costs[step_parameters['model']]
+    if 'llm_name' not in step_parameters:
+        step_parameters['llm_name'] = llm['llm']
+    if 'max_tokens' not in step_parameters:
+        step_parameters['max_tokens'] = llm['context']
 
     step_parameters['prompt_name'] = Path(prompt_name).stem
     step_parameters['name'] = prompt_name[:-5]
@@ -198,8 +219,9 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
     try:
         step = Step(**step_parameters)
     except TypeError as err:
-        log.error(f"Error in .llm line, unknown parm")
-        exit(2)
+        err_msg = f"Error in .llm line, unknown parm"
+        log.error(err_msg, err)
+        raise err
     # log.info(f"Step: {step}")
 
     # Check for Clear Directories
@@ -209,8 +231,9 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
         try:
             dirs = json.loads(json_str)
         except JSONDecodeError as err:
-            log.error(f"Error parsing .clear line: {err.msg}\n.clear {json_str[2:-2]}\n{'-' * (err.pos + 5)}^")
-            exit(2)
+            err_msg = f"Error parsing .clear line: {err.msg}\n.clear {json_str[2:-2]}\n{'-' * (err.pos + 5)}^"
+            log.error(err_msg, err)
+            raise err
 
         log.info(f"Clearing {dirs}")
         for d in dirs:
@@ -221,9 +244,10 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
                 elif os.path.isfile(f):
                     os.remove(f)
                 else:
-                    log.error(f"Unknown file type {f}")
+                    log.error(f"Unknown file type {f}", None)
 
     await step.run(proc_name, messages=messages)
+
     return step
 
 
@@ -231,27 +255,39 @@ async def run_ke(args: argparse.Namespace):
     # Does Directory have configuration file?
     if not os.path.exists(f"./ke_process_config.env"):
         log.error(f"[No ke_process_config.env file]\n"
-                  f"The Directory {os.getcwd()} is not a KnowledgeEngineer Process Directory")
+                  f"The Directory {os.getcwd()} is not a KnowledgeEngineer Process Directory", None)
         exit(2)
 
     proc_name = Path(os.getcwd()).stem
     load_dotenv('ke_process_config.env')
 
-    if args.list:
-        list_all_processes()
-        return
+    try:
+        if args.list:
+            list_all_processes()
+            return
 
-    if args.log is not None:
-        log.log_file(args.log)
-        log.info(f"Logging to: {args.log}")
+        if args.log is not None:
+            log.log_file(args.log)
+            log.info(f"Logging to: {args.log}")
 
-    if args.step:
-        step: Step = await execute_step(proc_name, args.step)
-        return
+        if args.step:
+            try:
+                step: Step = await execute_step(proc_name, args.step)
+            except Exception as err:
+                err_msg = f"Execution of --step={args.step} failed: {err}"
+                log.error(err_msg, err)
+                raise err
+            return
 
-    if args.execute:
-        await execute_process(proc_name)
-        return
+        if args.execute:
+            await execute_process(proc_name)
+            return
+
+    except Exception as err:
+        if args.debug:
+            tb_str = traceback.format_exc()
+            from rich import print
+            print(tb_str)  # use rich print function to pretty print the traceback
 
 
 if __name__ == "__main__":

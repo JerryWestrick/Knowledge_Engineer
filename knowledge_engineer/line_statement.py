@@ -189,9 +189,17 @@ class Compiler:
                     role = statement['role']
 
                 case 'include_statement':
-                    msgs = self.db.read_msgs(statement['name'], process_name=process_name)
-                    for msg in msgs[:-1]:
-                        stmts[msg['role']] = f"{stmts[msg['role']]}\n{msg['content']}"
+                    parse_msgs = True
+                    name = statement['name']
+                    if name[0] == '@':
+                        parse_msgs = False
+                        name = statement['name'][1:]
+                        lines = self.db.read_lines(name, process_name=process_name)
+                        stmts['user'] = f"{stmts['user']}\n{'\n'.join(lines)}"
+                    else:
+                        msgs = self.db.read_msgs(name, process_name=process_name)
+                        for msg in msgs[:-1]:
+                            stmts[msg['role']] = f"{stmts[msg['role']]}\n{msg['content']}"
 
                 case 'llm_statement':
                     messages.append({'role': 'llm', 'content': statement['parms']})

@@ -49,7 +49,7 @@ def read_file(name: str):
     try:
         file_contents = read_file_to_string('/path/to/your/file')
     except Exception as err:
-        log.error(f"Error while reading file for AI... {err}")
+        log.error(f"Error while reading file for AI... ", err)
         result = {'role': 'tool',
                   'name': 'read_file',
                   'content': f'ERROR file not found: {name}'
@@ -64,7 +64,7 @@ def write_file(name: str, contents: str):
     try:
         write_string_to_file(file_path=name, text=contents)
     except Exception as err:
-        log.error(f"Error while writing file for AI... {err}")
+        log.error(f"Error while writing file for AI...", err)
         raise
 
     return 'Done.'
@@ -159,7 +159,7 @@ async def main():
         match finish_reason:
             case 'tool_calls':
                 if len(msg.tool_calls) > 1:
-                    log.error(f"{finish_reason} more than one tool call {msg.tool_calls}")
+                    log.error(f"{finish_reason} more than one tool call {msg.tool_calls}", None)
                     exit(1)
                 function_call = response.choices[0].message.tool_calls[0].function
                 function_name = function_call.name
@@ -187,7 +187,7 @@ async def main():
                     break
 
             case _:
-                log.error(f"Invalid finish_reason: <{finish_reason}>")
+                log.error(f"Invalid finish_reason: <{finish_reason}>", None)
                 break
 
     await db.disconnect()

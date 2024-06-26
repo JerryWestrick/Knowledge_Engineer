@@ -2,7 +2,7 @@
 import os
 import time
 
-from .ai import AI, AIException
+from .ai import AI, AIException, OpenAI, Mistral, Anthropic
 from .db import DB
 from .logger import Logger
 
@@ -33,12 +33,30 @@ class Step:
         if response_format:
             rf = {"type": f"{response_format}"}
 
-        self.ai: AI = AI(llm_name=llm_name,
-                         model=model,
-                         max_tokens=max_tokens,
-                         temperature=temperature,
-                         response_format=rf
-                         )
+        # This should happen inside of AI(...)
+        if llm_name == 'openai':
+            self.ai: AI = OpenAI(llm_name=llm_name,
+                                 model=model,
+                                 max_tokens=max_tokens,
+                                 temperature=temperature,
+                                 response_format=rf
+                                 )
+        elif llm_name == 'mistral':
+            self.ai: AI = Mistral(llm_name=llm_name,
+                                  model=model,
+                                  max_tokens=max_tokens,
+                                  temperature=temperature,
+                                  response_format=rf
+                                  )
+        elif llm_name == 'anthropic':
+            self.ai: AI = Anthropic(llm_name=llm_name,
+                                  model=model,
+                                  max_tokens=max_tokens,
+                                  temperature=temperature,
+                                  response_format=rf
+                                  )
+        else:
+            raise ValueError(f"Unknown LLM: {llm_name}")
 
     def update_gui(self):
         # Send Update to the GUI
@@ -86,7 +104,7 @@ class Step:
             ai_response = await self.ai.generate(self, messages, process_name=self.pname)
         except AIException as err:
             err_msg = f'Step: {self.pname}:"{self.name}" ai.generate failed'
-            self.log.error(err_msg)
+            self.log.error(err_msg, err)
             raise err
 
         self.update_gui()
