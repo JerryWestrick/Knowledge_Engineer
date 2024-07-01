@@ -4,7 +4,7 @@
 
 
 
-OpenAI, Mistral, Anthropic are supported, I amd Now working on OLLama for local LLM execution. The program can be extended by modifying the "Knowledge Engineer Prompt File" Domain Specific Language (DSL).  
+OpenAI, Mistral, Anthropic are supported, I am working on OLLama for local LLM execution. The program can be extended by modifying the "Knowledge Engineer Prompt File" Domain Specific Language (DSL).  
 
 (That is a fancy way to say:  "by modifying the syntax of the **.kepf** files.")
 
