@@ -8,8 +8,9 @@ The --editable option is used to install the package in "editable" mode.  This m
 
 You can uninstall the package using the following command:
 
+    ```
     pip uninstall knowledge-engineer
-
+    ```
 
 
 # Release A Version
@@ -28,8 +29,10 @@ In order to release a version of the knowledge-engineer package, you need to do 
 
 ### 1. Uninstall the Knowledge Engineer package from your local environment
 
+    ```
     pip uninstall knowledge-engineer
-
+    ```
+    
 ### 2. Increment the version no in the setup.cfg file.
     
     The version number is in the setup.cfg file.  Increment the version number by one.  The version number is in the following format:
@@ -42,34 +45,46 @@ In order to release a version of the knowledge-engineer package, you need to do 
 
 3. Build the distribution files.     
 
-
+    ```
     rm -r dist
     python -m build
+    ```
 
-4. Upload the distribution files to the test.pypi repository.
+    To Install
+    ```
+    python3 -m pip install --upgrade build
+    ```
+
+5. Upload the distribution files to the test.pypi repository.
     
-        twine upload --repository testpypi dist/*
+   ```
+   twine upload --repository testpypi dist/*
+   ```
 
-5. Test the test release.
+6. Test the test release.
 
-
+    ```
     pip install --index-url https://test.pypi.org/simple/ --no-deps knowledge-engineer
+    ```
+    
+7. uninstall the test release.\
 
-6. uninstall the test release.\
-
-
+    ```
     pip uninstall knowledge-engineer
+    ```
+    
+8. Upload the distribution files to the pypi repository.
 
-7. Upload the distribution files to the pypi repository.
-
-
+    ```
     twine upload  --repository pypi dist/*
+    ```
+    
+9. Install the release.
 
-8. Install the release.
-
-
+    ```
     pip install knowledge-engineer
-
-9. Test the release.
+    ```
+    
+10. Test the release.
 
     Good luck
