@@ -4,7 +4,7 @@
 
 
 
-OpenAI GPT Chat is the first to be supported, but the program is designed to be extensible to other LLMs. The program can be extended by modifying the "Knowledge Engineer Prompt File" Domain Specific Language (DSL).  
+OpenAI, Mistral, Anthropic are supported, I am working on OLLama for local LLM execution. The program can be extended by modifying the "Knowledge Engineer Prompt File" Domain Specific Language (DSL).  
 
 (That is a fancy way to say:  "by modifying the syntax of the **.kepf** files.")
 
