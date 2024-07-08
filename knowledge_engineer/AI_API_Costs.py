@@ -14,8 +14,11 @@ AI_API_Costs = {
     "codestral-latest": {"llm": "mistral", "model": "codestral-latest", "input": 2.00 / 1000, "output": 6.00 / 1000, "context": 32000, },
     "open-mixtral-8x22b": {"llm": "mistral", "model": "open-mixtral-8x22b", "input": 2.00 / 1000, "output": 6.0 / 1000, "context": 64000, },
     # These are defined price per million...  But value in price is calculate as price per thousand
-    "claude-3-5-sonnet-20240620": {"llm": "anthropic", "model": "claude-3-5-sonnet-20240620", "input": 0.00300 / 1000, "output": 0.015 / 1000, "context": 4096, },
-    "claude-3-sonnet-20240229": {"llm": "anthropic", "model": "claude-3-sonnet-20240229", "input": 0.015 / 1000,  "output": 0.075 / 1000, "context": 4096, },
-    "claude-3-opus-20240229": {"llm": "anthropic", "model": "claude-3-sonnet-20240229", "input": 0.03 / 1000,  "output": 15.0 / 1000, "context": 4096, },
-    "claude-3-haiku-20240307": {"llm": "anthropic", "model": "claude-3-haiku-20240307", "input": 0.000025 / 1000, "output": 0.000125 / 1000, "context": 4096, },
+    "claude-3-5-sonnet-20240620": {"llm": "anthropic", "model": "claude-3-5-sonnet-20240620", "input": 3.00 / 1000000, "output": 15.00 / 1000000, "context": 4096, },
+    "claude-3-sonnet-20240229": {"llm": "anthropic", "model": "claude-3-sonnet-20240229", "input": 15.0 / 1000000,  "output": 75.0 / 1000000, "context": 4096, },
+    "claude-3-opus-20240229": {"llm": "anthropic", "model": "claude-3-sonnet-20240229", "input": 3.0 / 1000000,  "output": 15.0 / 1000000, "context": 4096, },
+    "claude-3-haiku-20240307": {"llm": "anthropic", "model": "claude-3-haiku-20240307", "input": 0.25 / 1000000, "output": 1.25 / 1000000, "context": 4096, },
+    "llama3": {"llm": "ollama", "model": "llama3", "input": 0.0, "output": 0.0, "context": 4096, },
+    "phi3": {"llm": "ollama", "model": "phi3", "input": 0.0, "output": 0.0, "context": 4096, },
+    "llama3-70b-8192": {"llm": "groq", "model": "llama3-70b-8192", "input": 0.59 / 1000000, "output": 0.79 / 1000000, "context": 8192, }
 }

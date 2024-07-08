@@ -2,7 +2,7 @@
 import os
 import time
 
-from .ai import AI, AIException, OpenAI, Mistral, Anthropic
+from .ai import AI, AIException, OpenAI, Mistral, Anthropic, Ollama, GroqAI
 from .db import DB
 from .logger import Logger
 
@@ -50,11 +50,25 @@ class Step:
                                   )
         elif llm_name == 'anthropic':
             self.ai: AI = Anthropic(llm_name=llm_name,
-                                  model=model,
-                                  max_tokens=max_tokens,
-                                  temperature=temperature,
-                                  response_format=rf
-                                  )
+                                    model=model,
+                                    max_tokens=max_tokens,
+                                    temperature=temperature,
+                                    response_format=rf
+                                    )
+        elif llm_name == 'ollama':
+            self.ai: AI = Ollama(llm_name=llm_name,
+                                 model=model,
+                                 max_tokens=max_tokens,
+                                 temperature=temperature,
+                                 response_format=rf
+                                 )
+        elif llm_name == 'groq':
+            self.ai: AI = GroqAI(llm_name=llm_name,
+                                 model=model,
+                                 max_tokens=max_tokens,
+                                 temperature=temperature,
+                                 response_format=rf
+                                 )
         else:
             raise ValueError(f"Unknown LLM: {llm_name}")
 
@@ -103,8 +117,15 @@ class Step:
             self.update_gui()
             ai_response = await self.ai.generate(self, messages, process_name=self.pname)
         except AIException as err:
-            err_msg = f'Step: {self.pname}:"{self.name}" ai.generate failed'
+            err_msg = f'Step: {self.pname}:"{self.name}" ai.generate failed: {err}'
             self.log.error(err_msg, err)
+
+            # Write log file
+            log_dir: str = os.getenv('KE_PROC_DIR_LOGS')
+            full_path: str = f"{log_dir}/{self.prompt_name} log.md"
+            self.log.info(f'│ Writing log "{full_path}"')
+            self.memory[full_path] = f"{self.ai.answer}\nError:{err_msg}"
+
             raise err
 
         self.update_gui()

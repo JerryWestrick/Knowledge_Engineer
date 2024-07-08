@@ -60,9 +60,9 @@ class Logger:
     def umsg(self, step, msg: dict):
         content = [f"{msg['content']}"]
         head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
-        self.p(f"{self.ts()}{head}[medium_orchid]{msg['role'] + ' message':>14}[/] [green]{content}[/]")
+        self.p(f"{self.ts()}{head}[medium_orchid]{msg['role']:>14}[/] [green]{content}[/]")
 
-    def ai_msg(self, step, content: str, stop_reason: str):
+    def ai_msg(self, step, content: str, stop_reason: str = ''):
 
         head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
         txt = content.replace('\n', '\\n')
@@ -92,12 +92,12 @@ class Logger:
         }
 
         func_name_actions.get(func_name,
-                              lambda: self.p(f"{self.ts()}{head}{fn} ({args['name']}, ...)[green]{[arg_str]}[/]"))()
+                              lambda: self.p(f"{self.ts()}{head}{fn} ({args['filename']}, ...)[green]{[arg_str]}[/]"))()
 
     def ret_msg(self, step, result: Dict[str, str]):
         head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
         txt = result['content'].replace('\n', '\\n')
-        self.p(f"{self.ts()}{head}           [medium_orchid]rtn[/] [green]{result['name']}:: {txt}[/]")
+        self.p(f"{self.ts()}{head}[medium_orchid]{'return':>14}[/] [green]{result['name']}:: {txt}[/]")
 
     def __init__(self, namespace: str, debug: bool = True):
         self.namespace = namespace

@@ -5,13 +5,19 @@ import subprocess
 import sys
 from abc import abstractmethod
 
+import aiohttp
 import anthropic
+import httpx
+from groq import AsyncGroq
+
 from anthropic import AsyncAnthropic
 
 from dotenv import load_dotenv
+from httpx import ReadTimeout
 from mistralai.async_client import MistralAsyncClient
 from mistralai.models.chat_completion import ChatMessage
 from openai import AsyncOpenAI
+from rich.prompt import Prompt
 
 from .AI_API_Costs import AI_API_Costs
 from .db import DB
@@ -100,31 +106,31 @@ class AI:
         # self.log.info(f"Database Update Result: {result}")
         return await succeed({'role': self.function_role(), 'name': 'execute_db', 'content': str(result)})
 
-    async def readfile(self, name: str, process_name: str):
+    async def readfile(self, filename: str, process_name: str):
 
         try:
-            file_contents = self.memory.read(name, process_name=process_name)
+            file_contents = self.memory.read(filename, process_name=process_name)
 
         except Exception as err:
             self.log.error(f"Error while reading file for AI... ", err)
             result = await succeed({'role': self.function_role(),
                                     'name': 'read_file',
-                                    'content': f'ERROR file not found: {name}'
+                                    'content': f'ERROR file not found: {filename}'
                                     })
             return result
 
-        return await succeed({'name': 'read_file', 'content':file_contents})
+        return await succeed({'name': 'read_file', 'content': file_contents})
 
-    async def writefile(self, name: str, contents: str, process_name: str):
-        full_name = name
+    async def writefile(self, filename: str, content: str, process_name: str):
+        full_name = filename
         try:
-            self.memory[full_name] = contents
+            self.memory[full_name] = content
         except Exception as err:
             err_msg = f"Error while writing file for AI... "
             self.log.error(err_msg, err)
             raise err
 
-        return await succeed({'role': self.function_role(), 'name': 'write_file', 'content': 'Done.'})
+        return await succeed({'role': self.function_role(), 'name': 'writefile', 'content': 'Done.'})
 
     def exec_subprocess(self, command: str) -> str:
         """Execute a local command and return its output in a message structure"""
@@ -153,6 +159,13 @@ class AI:
         msg = {'name': 'exec', 'role': self.function_role(), 'content': f'AI exec {txt}'}
         return await succeed(msg)
 
+    async def ask_user(self, question: str) -> dict[str, str]:
+        """The LLM asks the local user for clarification"""
+
+        user_response = Prompt.ask(f"AI Asks: {question}")
+        msg = {'name': 'exec', 'role': self.function_role(), 'content': f'user Answer: {user_response}'}
+        return await succeed(msg)
+
     functions = [
         {
             "name": "readfile",
@@ -160,12 +173,12 @@ class AI:
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "name": {
+                    "filename": {
                         "type": "string",
                         "description": "The name of the file to read",
                     },
                 },
-                "required": ["name"],
+                "required": ["filename"],
             },
         },
         {
@@ -174,16 +187,16 @@ class AI:
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "name": {
+                    "filename": {
                         "type": "string",
                         "description": "The name of the file to write",
                     },
-                    "contents": {
+                    "content": {
                         "type": "string",
                         "description": "The contents of the file",
                     },
                 },
-                "required": ["name", "contents"],
+                "required": ["filename", "content"],
             },
         },
         {
@@ -213,6 +226,20 @@ class AI:
                 },
                 "required": ["sql"],
             },
+        },
+        {
+            "name": "ask_user",
+            "description": f"Get Clarification by Asking the user a question",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "description": "Question to ask the user",
+                    },
+                },
+                "required": ["question"],
+            },
         }
     ]
     available_functions = {
@@ -220,6 +247,7 @@ class AI:
         "writefile": writefile,
         "exec": execute_cmd_ai,
         "query_db": query_db_ai,
+        "ask_user": ask_user,
     }
 
     @abstractmethod
@@ -243,6 +271,12 @@ class AI:
             elif self.llm_name.lower() == 'anthropic':
                 api_key = os.getenv('ANTHROPIC_API_KEY')
                 self.client = AsyncAnthropic(api_key=api_key)
+
+            elif self.llm_name.lower() == 'ollama':
+                self.client = Ollama(llm_name='ollama')
+
+            elif self.llm_name.lower() == 'groq':
+                self.client = AsyncGroq()
 
             else:
                 raise ValueError(f"Unknown LLM: {self.llm_name}")
@@ -573,7 +607,8 @@ class Anthropic(AI):
                     self.log.ai_msg(step, block.text, stop_reason)
                     self.answer += f"\n{block.text}"
                 elif typ == "tool_use":
-                    content_blocks.append({"type": "tool_use", "id": block.id, "name": block.name, "input": block.input})
+                    content_blocks.append(
+                        {"type": "tool_use", "id": block.id, "name": block.name, "input": block.input})
                     self.log.ai_tool_call(step, block.name, block.input)
             self.messages.append({"role": "assistant", "content": content_blocks})
 
@@ -603,6 +638,251 @@ class Anthropic(AI):
                 self.e_stats['completion_tokens'] + response.usage.output_tokens
 
         return False
+
+
+class Ollama(AI):
+
+    def __init__(self, llm_name: str, model: str = "llama3",
+                 temperature: float = 0, max_tokens: int = 4000,
+                 mode: str = 'complete', response_format=None):
+        super().__init__(llm_name, model, temperature, max_tokens, mode, response_format)
+        # additional initialization goes here
+        self.ollama_tools = None
+
+    # Add or override methods for the AI_OpenAI class as required
+
+    def function_role(self) -> str:
+        return 'tool_result'
+
+    def make_msg(self, msg: dict[str, str]) -> dict[str, str] | ChatMessage:
+        return msg
+
+    async def chat(self, messages: list[dict[str, str]], step, process_name):
+        if self.ollama_tools is None:
+            self.ollama_tools = []
+            for func in self.functions:
+                new_func = {"name": func["name"],
+                            "description": func["description"],
+                            "input_schema": func["parameters"],
+                            }
+                self.ollama_tools.append(new_func)
+
+        system_msg = ''
+        if messages[0]['role'] == 'system':
+            system_msg = messages.pop(0)['content']
+
+        url_generate = "http://localhost:11434/api/chat"
+        headers = {"Content-Type": "application/json"}  # Depending on server you might need to include headers
+        data = {
+            "model": "llama3",
+            "messages": self.messages,
+            "stream": False,
+            "format": "json"
+        }
+
+        repeat = True
+        async with httpx.AsyncClient(timeout=600.0) as client:
+            while repeat:
+                repeat = False
+                try:
+                    response = await client.post(url_generate, json=data, headers=headers)
+                except ReadTimeout as err:
+                    self.log.error(f"Read Time Out Error while accessing Ollama.", err)
+                    raise err
+                except Exception as err:
+                    self.log.error(f"Error while accessing Ollama: {err.__cause__}", err)
+                    raise err
+
+                if response.status_code != 200:
+                    err_msg = f"{response.status}::{text}"
+                    err = ValueError(err_msg)
+                    self.log.error(err_msg, err)
+                    raise err
+                status = response.status_code
+                text = response.text
+                response_message = json.loads(text)
+                # stop_reason = response_message['done_reason']
+                msg = response_message["message"]
+                self.log.ai_msg(step, f"{status}::{text}")
+                if msg['content'].startswith('{"call_function": '):
+                    function_call = json.loads(msg['content'])
+                    self.log.info(f"Ollama Function Call: {function_call}")
+                    rtn = self.available_functions[function_call['call_function']]
+                    del function_call['call_function']
+                    result = await rtn(self, **function_call, process_name=process_name)
+                    new_msg = {"role": "user", "content": result['content']}
+                    self.messages.append(new_msg)
+                    self.log.ret_msg(step, result)
+                    repeat = True
+                else:
+                    self.answer += f"\n{msg['content']}"
+
+
+            # # Call Anthropic
+            # try:
+            #     response = await self.client.messages.create(
+            #         model=self.model,
+            #         system=system_msg,
+            #         messages=messages,
+            #         tools=self.anthropic_tools,
+            #         tool_choice={"type": "auto"},
+            #         max_tokens=self.max_tokens,
+            #     )
+            #
+            # except anthropic.APIConnectionError as err:
+            #     err_msg = f"The server could not be reached"
+            #     self.log.error(err_msg, err)
+            #     response = {'role': 'system', 'error': err_msg}
+            #     raise err
+            #
+            # except anthropic.RateLimitError as err:
+            #     err_msg = (f"A 429 status code (RateLimitError) was received; we should back off a bit.\n"
+            #                f" Call to Anthropic returned error: {err.__cause__}"
+            #                )
+            #     self.log.error(err_msg, err)
+            #     response = {'role': 'system', 'error': err_msg}
+            #     raise err
+            #
+            # except anthropic.APIStatusError as err:
+            #     err_msg = (f"Received status code {err.status_code} from Anthropic\n"
+            #                f" Call to Anthropic returned error: {err}\n"
+            #                )
+            #     self.log.error(err_msg, err)
+            #     response = {'role': 'system', 'error': err_msg}
+            #     raise err
+            #
+            # # Build AI response and add it to messages
+            # content_blocks = []
+            # stop_reason = response.stop_reason
+            # for block in response.content:
+            #     typ = block.type
+            #     if typ == "text":
+            #         content_blocks.append({"type": "text", "text": block.text})
+            #         self.log.ai_msg(step, block.text, stop_reason)
+            #         self.answer += f"\n{block.text}"
+            #     elif typ == "tool_use":
+            #         content_blocks.append({"type": "tool_use", "id": block.id, "name": block.name, "input": block.input})
+            #         self.log.ai_tool_call(step, block.name, block.input)
+            # self.messages.append({"role": "assistant", "content": content_blocks})
+            #
+            # # Begin Processing response
+            # function_name = None
+            # function_args = None
+            # text = ''
+            # stop_reason = response.stop_reason
+            #
+            # for block in response.content:
+            #     if block.type == 'tool_use':
+            #         function_name = block.name
+            #         function_args = block.input
+            #         rtn = self.available_functions[function_name]
+            #         result = await rtn(self, **function_args, process_name=process_name)
+            #         new_msg = {"role": "user", "content": [
+            #             {"type": "tool_result", "tool_use_id": block.id, "content": result['content']}
+            #         ]}
+            #         self.messages.append(new_msg)
+            #         self.log.ret_msg(step, result)
+            #         repeat = True
+
+
+            # Gather Answer
+            # self.e_stats['prompt_tokens'] = \
+            #     self.e_stats['prompt_tokens'] + response.usage.input_tokens
+            # self.e_stats['completion_tokens'] = \
+            #     self.e_stats['completion_tokens'] + response.usage.output_tokens
+
+        return False
+
+
+class GroqAI(AI):
+
+    def __init__(self, llm_name: str, model: str = "gpt-3.5-turbo-1106",
+                 temperature: float = 0, max_tokens: int = 4000,
+                 mode: str = 'complete', response_format=None):
+        super().__init__(llm_name, model, temperature, max_tokens, mode, response_format)
+        # additional initialization goes here
+        self.groq_tools = None
+
+    # Add or override methods for the AI_OpenAI class as required
+
+    def function_role(self) -> str:
+        return 'tool_result'
+
+    # def function_result(self, name: str, content: str):
+    #     return {"role": "user", "content": [{'type': "tool_result", "tool_use_id": tool_id, "content": content}]}
+    #
+    def make_msg(self, msg: dict[str, str]) -> dict[str, str] | ChatMessage:
+        return msg
+
+    async def chat(self, messages: list[dict[str, str]], step, process_name):
+        if self.groq_tools is None:
+            self.groq_tools = []
+            for func in self.functions:
+                new_func = {"type": "function",
+                            "function": {
+                                 "name": func["name"],
+                                 "description": func["description"],
+                                 "parameters": func["parameters"],
+                            }}
+                self.groq_tools.append(new_func)
+
+        # Groq uses system message as normal message with role=system
+        # system_msg = ''
+        # if messages[0]['role'] == 'system':
+        #     system_msg = messages.pop(0)['content']
+
+        repeat = True
+        while repeat:
+            repeat = False
+            # Call Groq
+            try:
+                response = await self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    tools=self.groq_tools,
+                    tool_choice="auto",
+                    max_tokens=self.max_tokens,
+                )
+
+            except Exception as err:
+                err_msg = f"Error during call of GROQ: {err}"
+                self.log.error(err_msg, err)
+                response = {'role': 'system', 'error': err_msg}
+                raise AIException(err_msg)
+
+            # Build AI response and add it to messages
+            stop_reason = response.choices[0].finish_reason
+            message = response.choices[0].message
+            self.messages.append(message)
+
+            if message.tool_calls:
+                for tool_call in message.tool_calls:
+                    function_name = tool_call.function.name
+                    call_args = json.loads(tool_call.function.arguments)
+                    call_id = tool_call.id
+                    self.log.ai_tool_call(step, function_name, call_args)
+                    rtn = self.available_functions[function_name]
+                    result = await rtn(self, **call_args, process_name=process_name)
+                    new_msg = {"role": "tool", "tool_call_id": call_id, "name": function_name, "content": str(result['content'])}
+                    self.messages.append(new_msg)
+                    ret_msg = {""}
+                    self.log.ret_msg(step, result)
+                    repeat = True
+            else:
+                content = {"type": "text", "text": message.content, "role": "Assistant"}
+                self.log.ai_msg(step, message.content, stop_reason)
+                self.answer += f"\n{message.content}"
+
+
+            # Gather Answer
+            self.e_stats['prompt_tokens'] = \
+                self.e_stats['prompt_tokens'] + response.usage.prompt_tokens
+            self.e_stats['completion_tokens'] = \
+                self.e_stats['completion_tokens'] + response.usage.completion_tokens
+
+        return False
+
+
 
 
 if __name__ == "__main__":

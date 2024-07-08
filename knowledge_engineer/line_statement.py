@@ -172,7 +172,7 @@ class Compiler:
     def execute(self, statements, process_name: str = ''):
         calls = []
         messages = []
-        stmts: dict[str, str] = {'system': '', 'user': ''}
+        stmts: dict[str, str] = {'system': '', 'user': '', 'assistant': ''}
         role = 'user'
         literal_line_content = ''
 
@@ -186,6 +186,11 @@ class Compiler:
                     stmts[role] = new_value.strip()     # Drop Leading and Trailing WhiteSpace
 
                 case 'set_role':
+                    for k, v in stmts.items():
+                        if v:
+                            messages.append({'role': k, 'content': v})
+                            stmts[k] = ''
+
                     role = statement['role']
 
                 case 'include_statement':
@@ -239,8 +244,10 @@ class Compiler:
                     if stmts['system'] != '':
                         messages.append({'role': 'system', 'content': stmts['system']})
                     messages.append({'role': 'user', 'content': stmts['user']})
+                    if stmts['assistant'] != '':
+                        messages.append({'role': 'assistant', 'content': stmts['assistant']})
                     messages.append({"role": "exec", "content": "Execute Call AI Before Continuing"})
-                    stmts = {'system': '', 'user': ''}
+                    stmts = {'system': '', 'user': '', 'assistant': ''}
 
                 case _:
                     errmsg = f"Invalid instruction [{keyword}] "
@@ -252,6 +259,9 @@ class Compiler:
 
         if stmts['user'] != '':
             messages.append({'role': 'user', 'content': stmts['user'].strip()})
+
+        if stmts['assistant'] != '':
+            messages.append({'role': 'assistant', 'content': stmts['assistant'].strip()})
 
         if messages[-1]['role'] != 'exec':
             messages.append({"role": "exec", "content": "Default Execute Call AI at end"})

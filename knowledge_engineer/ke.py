@@ -126,18 +126,21 @@ def main():
         return
 
     if args.models:
-        log.info(f" {'LLM':10} {'Model':25} {'Max Token'} {'$/m-Tok In':>12} {'$/m-Tok Out':>12}")
-        log.info(f" {'-' * 10} {'-' * 25} {'-' * 10} {'-' * 12} {'-' * 12} ")
+        log.info(f" {'LLM':15} {'Model':35} {'Max Token'} {'$/m-Tok In':>12} {'$/m-Tok Out':>12}")
+        log.info(f" {'-' * 15} {'-' * 35} {'-' * 10} {'-' * 12} {'-' * 12} ")
 
-        keys: list[str] = list(AI_API_Costs.keys())
-        keys.sort()
-        for k in keys:
-            v = AI_API_Costs.get(k)
+        # Sort by LLM name, then model.
+        sortable_keys = [f"{AI_API_Costs[model]['llm']}:{model}" for model in AI_API_Costs.keys()]
+        sortable_keys.sort()
+
+        for k in sortable_keys:
+            llm, model_name = k.split(':', maxsplit=1)
+            v = AI_API_Costs.get(model_name)
             model = '"' + v['model'] + '"'
             input = f"{v['input']*1000:06.4f}"
             output = f"{v['output']*1000:06.4f}"
             llm = f'"{v["llm"]}"'
-            log.info(f" {llm:10} {model :25} {v['context']:>10,} {input:>12} {output:>12}")
+            log.info(f" {llm:15} {model :35} {v['context']:>10,} {input:>12} {output:>12}")
 
     if args.functions:
         log.info(f" {'Function':45} {'Description':50}")
