@@ -10,11 +10,11 @@ If you give it too big of a problem it gets lost.
 
 
 This problem is compounded when trying to get the AI to do something like coding which is extremely exacting. 
-This is the famous ***context size***.  I refer to it as "***short attention span***", 
+This is related to the famous ***context size***.  I refer to it as "***short attention span***", 
 which is the easiest way to understand the effects.  
 
 Newer models of AI have increased the ***context sizes*** from 32k tokens to 128K tokens (a factor of 4 times). 
-This works a lot better, **_but does not_** give us an attention span 4 times longer.  
+This works better, **_but does not_** give us an attention span 4 times longer.  
 
 We are pushing up a curve of diminishing returns!
 
