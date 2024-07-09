@@ -1,4 +1,4 @@
-# Why Knowledge Engineer?  What Problem Does it solve?
+# Why Knowledge Engineer?  What Problem Does it Address?
 
 
 ## LLMs and Short Attention Spans
@@ -145,7 +145,7 @@ and could actually get AI to produce something useful.
 Jerry The Dinosaur
 
 **_P.S._** 
-Maybe it took a Dinosaur to see how our most ancient techniques 
-would work well with the newest most modern technology.  
+Maybe it took a Dinosaur to see how our most ancient IT techniques 
+would work well with the newest most modern IT technology.  
 But I think it is a good idea,  What do you think?
 
