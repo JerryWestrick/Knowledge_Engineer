@@ -33,14 +33,18 @@ In order to release a version of the knowledge-engineer package, you need to do 
     pip uninstall knowledge-engineer
     ```
     
-### 2. Increment the version no in the setup.cfg file.
+### 2. Increment the version no in the pyproject.toml file.
     
-    The version number is in the setup.cfg file.  Increment the version number by one.  The version number is in the following format:
+    **This has been changed...** 
+    We used to use the setup.cfg, but now are following this doc: https://www.freecodecamp.org/news/how-to-create-and-upload-your-first-python-package-to-pypi/ 
+    
+
+    The version number is in the pyproject.toml file.  Increment the version.  The version number is in the following format:
 
     ```
-    [metadata]
-    name = knowledge_engineer
-    version = 0.1.2
+[project]
+name = "knowledge_engineer"
+version = "0.5.0"
     ```
 
 3. Build the distribution files.     
