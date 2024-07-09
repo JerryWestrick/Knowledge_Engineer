@@ -4,8 +4,8 @@ from knowledge_engineer.logger import Logger
 
 New_Process_Prompts: dict[str, str] = {
     # =======================================
-    '1-MakeRequirements.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
+    '1- MakeRequirements.kepf':
+        """.llm "model": "gpt-3.5-turbo-0125"
 .clear "Code/*", "Planning/*", "Logs/*"
 .system
 You are a Knowledge Engineer creating a GPT4 Turbo prompt.
@@ -27,7 +27,7 @@ Write the prompt to 'Planning/Gen_Code_Prompt.md' using function 'write_file'.
 
     # ==========================================
     '2- Make Snake Game.kepf':
-        """.llm "llm_name": "OpenAI", "model": "gpt-4-0125-preview", "max_tokens": 50000
+        """.llm "model": "gpt-4-0125-preview"
 
 .system
 You are an IT Engineer, programming a Python 3 Application
@@ -50,9 +50,11 @@ Base_Dir: dict[str, str] = {
     'ke_process_config.env':
         """KE_PROC_DIR_PROMPTS='Prompts'
 KE_PROC_DIR_LOGS='Logs'
-OPENAI_API_KEY='Your Open AI API Key'
-MISTRAL_API_KEY='Your Mistral API Key'
-KE_PROC_DB_URL="postgresql+aiopg://user:password@localhost/database"
+OPENAI_API_KEY='API Key'
+MISTRAL_API_KEY='API Key'
+CODESTRAL_API_KEY='API Key'
+ANTHROPIC_API_KEY='API Key'
+GROQ_API_KEY='API Key'
 # PostgreSQL: "postgresql://user:password@localhost/dbname"
 # MySQL: "mysql://user:password@localhost/dbname"
 # SQLite: "sqlite:///path/to/dbfile"

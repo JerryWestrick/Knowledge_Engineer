@@ -7,7 +7,7 @@ knowledge_engineer = ["*.md"]
 
 [project]
 name = "knowledge_engineer"
-version = "0.2.1"
+version = "0.5.1"
 authors = [
     { name = "Jerry Westrick", email = "jerry@westrick.com" },
 ]
@@ -24,6 +24,9 @@ dependencies = [
     "openai",
     "mistralai",
     "python-dotenv",
+    "aiohttp",
+    "anthropic",
+    "groq",
     "lark",
     "databases",
     "knowledge_engineer",

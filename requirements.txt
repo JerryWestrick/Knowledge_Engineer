@@ -1,15 +1,16 @@
 rich
 openai
 mistralai
+groq
+anthropic
 
 python-dotenv
 lark
 
 databases
+aiohttp
+anthropic
+groq
+
 knowledge_engineer
 
-# Test restaurant
-aiopg
-
-python-dotenv
-rich
