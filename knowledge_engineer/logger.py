@@ -28,6 +28,11 @@ class Logger:
     bottom_right = '──╯'
 
     @classmethod
+    def my_console(self):
+        global console
+        return console
+
+    @classmethod
     def log_file(cls, file_name: str) -> None:
         global log_file
         log_file_fn = open(file_name, "wt")
@@ -88,7 +93,9 @@ class Logger:
             'exec': lambda: [self.p(f"{self.ts()}{head}{fn} ({line}, ...)[green]{line[:2]}[/]") for line in
                              args['command'].split('\n')],
             'query_db': lambda: [self.p(f"{self.ts()}{head}{fn} ({line}, ...)[green]{line[:2]}[/]") for line in
-                                 args['sql'].split('\n')]
+                                 args['sql'].split('\n')],
+            'ask_user': lambda: [self.p(f"{self.ts()}{head}{fn} ({line}, ...)[green]{line[:2]}[/]") for line in
+                             args['question'].split('\n')]
         }
 
         func_name_actions.get(func_name,
@@ -120,6 +127,11 @@ class Logger:
         if self.debug:
             self.p(f"{self.ts()}{self.namespace:>10}::{msg}")
 
+    def ai_asks(self, msg: str):
+        global console
+        head = f"[green]{self.namespace:>10}::[/][white]│ [/][green]│ [/]"
+        answer = console.input(f"{self.ts()}{head}[medium_orchid]{'Input':>14}[/] [green]")
+        return answer
     @classmethod
     def get_instances(cls):
         return list(cls._instances)

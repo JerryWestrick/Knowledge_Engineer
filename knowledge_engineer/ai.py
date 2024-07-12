@@ -8,6 +8,7 @@ from abc import abstractmethod
 import aiohttp
 import anthropic
 import httpx
+from aioconsole import ainput
 from groq import AsyncGroq
 
 from anthropic import AsyncAnthropic
@@ -159,12 +160,44 @@ class AI:
         msg = {'name': 'exec', 'role': self.function_role(), 'content': f'AI exec {txt}'}
         return await succeed(msg)
 
-    async def ask_user(self, question: str) -> dict[str, str]:
+    async def ask_user(self, question: str, process_name: str) -> dict[str, str]:
         """The LLM asks the local user for clarification"""
 
-        user_response = Prompt.ask(f"AI Asks: {question}")
+        console = Logger.my_console()
+        console.print(f"{'-'*3} {question} {'-'*3}")
+        lines = []
+        while True:
+            line = console.input()
+            if line.strip() == '':
+                break
+            lines.append(line)
+
+        user_response = "\n".join(lines)
         msg = {'name': 'exec', 'role': self.function_role(), 'content': f'user Answer: {user_response}'}
         return await succeed(msg)
+
+
+    # async def ask_user(self, question: str, process_name: str) -> dict[str, str]:
+    #     """Asynchronously ask the user a question and get multi-line input."""
+    #     print(f"\n--- {process_name} ---")
+    #     print(f"AI Asks: {question}")
+    #     print("(Enter your multi-line response. Type 'END' on a new line when finished.)")
+    #
+    #     lines = []
+    #     while True:
+    #         line = await ainput()
+    #         if line.strip().upper() == 'END':
+    #             break
+    #         lines.append(line)
+    #
+    #     user_response = "\n".join(lines)
+    #
+    #     msg = {
+    #         'name': 'exec',
+    #         'role': self.function_role(),
+    #         'content': f'User Answer: {user_response}'
+    #     }
+    #     return msg
 
     functions = [
         {

@@ -2,33 +2,27 @@ import os
 
 from knowledge_engineer.logger import Logger
 
-New_Process_Prompts: dict[str, str] = {
+New_Process_Steps: dict[str, str] = {
     # =======================================
-    '1- MakeRequirements.kepf':
+    '1- Make Game Prompt.kepf':
         """.llm "model": "gpt-3.5-turbo-0125"
 .clear "Code/*", "Planning/*", "Logs/*"
 .system
-You are a Knowledge Engineer creating a GPT4 Turbo prompt.
-The prompt will instruct GPT3.5 to create a Python 3 Application
+You are a Knowledge Engineer creating a Chat GPT prompt.
+The prompt will instruct Chat GPT to create a Python 3 Application
 Do not explain yourself.
 Do not apologize.
 Complete the tasks given in a way that is optimized for Chat GPTs easy comprehension while not leaving anything out.
 Your answers will be in MarkDown
 .user
-read the description of the program: Requirements/ApplicationDescription.md
-create a prompt that will instruct GPT 4 Turbo to:
- - create a complete running program as described.
- - contain initialize, process, and terminate phases
- - list all the rules to be implemented
- - implement all the requirements in the prompts
-Write the prompt to 'Planning/Gen_Code_Prompt.md' using function 'write_file'.
+Write a prompt for Chat GPT that will make it create a minimal snake game using pygame.
+write it to the file Planning/Game Prompt.md
 .exec
 """,
 
     # ==========================================
     '2- Make Snake Game.kepf':
-        """.llm "model": "gpt-4-0125-preview"
-
+        """.llm "model": "gpt-3.5-turbo-0125"
 .system
 You are an IT Engineer, programming a Python 3 Application
 Do not explain yourself.
@@ -37,9 +31,7 @@ Check all code for completeness, correctness, and make sure it is executable.
 write all python code via the 'write_file' function to the 'Code/' directory.
 
 .user
-.include Planning/Gen_Code_Prompt.md
-write a complete executable program to 'Code/snake.py' with the 'write_file' function
-
+.include Planning/Game Prompt.md
 .exec
 """,
 
@@ -48,7 +40,7 @@ write a complete executable program to 'Code/snake.py' with the 'write_file' fun
 Base_Dir: dict[str, str] = {
     # =======================================
     'ke_process_config.env':
-        """KE_PROC_DIR_PROMPTS='Prompts'
+        """KE_PROC_DIR_PROMPTS='Steps'
 KE_PROC_DIR_LOGS='Logs'
 OPENAI_API_KEY='API Key'
 MISTRAL_API_KEY='API Key'
@@ -62,29 +54,7 @@ GROQ_API_KEY='API Key'
 
 }
 
-Requirements_Dir: dict[str, str] = {
-
-    # =======================================
-    'ApplicationDescription.md':
-        """You are writing a python version of the snake game using pygame.
-
-# The Game
-
-Implement the standard "snake" game using arrow keys and 'q' to quit.
-All rules and interface are to be as generally expected.
-
-#### Architecture: 
-python 3, with pygame
-
-#### The game_board 
-game_board size is 480x480.
-use different colors for snake and foods
-
-#### Game Play:
-The game is implemented as steps 10 per second.
-
-"""
-}
+Requirements_Dir: dict[str, str] = {}
 
 
 def create_new_proc(proc_name: str) -> None:
@@ -104,17 +74,17 @@ def create_new_proc(proc_name: str) -> None:
         with open(f"./{proc_name}/{k}", "w") as f:
             f.write(v)
 
-    # Create Prompt Directory
-    os.makedirs(f"./{proc_name}/Prompts")
-    for k, v in New_Process_Prompts.items():
-        with open(f"./{proc_name}/Prompts/{k}", "w") as f:
+    # Create Steps Directory
+    os.makedirs(f"./{proc_name}/Steps")
+    for k, v in New_Process_Steps.items():
+        with open(f"./{proc_name}/Steps/{k}", "w") as f:
             f.write(v)
 
     # Create Prompt Directory
-    os.makedirs(f"./{proc_name}/Requirements")
-    for k, v in Requirements_Dir.items():
-        with open(f"./{proc_name}/Requirements/{k}", "w") as f:
-            f.write(v)
+    # os.makedirs(f"./{proc_name}/Requirements")
+    # for k, v in Requirements_Dir.items():
+    #     with open(f"./{proc_name}/Requirements/{k}", "w") as f:
+    #         f.write(v)
 
     log.info(f"Created ExampleProcess in {proc_name}.")
     log.info(f"cd {proc_name}")
