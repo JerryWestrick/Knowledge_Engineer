@@ -3,22 +3,28 @@
 
 The KEPF language is used to create conversations with LLMs (Large Language Models) in a way that is easy to understand and use.  
 
-The KEPF language is designed to be used by non-programmers.  It is designed to be used by the domain experts.  It is designed to be used by the people who know the problem domain.
+The KEPF language is designed to be used by Prompt Engineers.
+The KEPF language is designed to be used by non-programmers.  
+The KEPF language is designed to be used by domain experts (i.e. people who know the problem domain).
 
 #### When we are discussing "how to build a conversation" (using KEPF), we cannot avoid seeing "the conversation we are building".  
 
-I will avoid discussions about the conversations themselves (Prompt Engineering).  And try to keep this document a ***HOW TO CREATE A PROMPT*** using the KEPF language.
+I will avoid discussions about the conversations themselves (Prompt Engineering).  
+And try to keep this document a ***HOW TO CREATE A PROMPT*** using the KEPF language.
 
 
 ## The grammar of the KEPF Language
-The KEPF language is a Domain Specific Language (DSL) that is used to create the prompts for the LLMs.  The language is designed to be simple and easy to use.
+The KEPF language is a Domain Specific Language (DSL) that is used to create the prompts for the LLMs.  
+The language is designed to be simple and easy to use.
 
 ### General Syntax
-The KEPF Language is line based.  Each line is a statement.   
+The KEPF Language is line based.  i.e. Each line is a statement.   
 
-Prompts to LLMs consist of messages.  KEPF has a concept of the 'current message' which is being built.  Text is added to the 'current message' until a new message is started or the Iteration with the LLM is started.
+Prompts to LLMs consist of messages.  
+KEPF has a concept of the 'current message' which is being built.  
+Text is added to the 'current message' until a new message is started or the Iteration with the LLM is started.
 
-There are 2 types of statements:
+In KEPF there are 2 types of statements:
 1. ***Key Word Statements***: These are lines that: 
    - have a period ('.') in column one 
    - immediately followed by a keyword
@@ -35,19 +41,27 @@ There are 2 types of statements:
     v   v   v     v
     .include Planning/Gen_Code_Prompt.md 
 ``` 
+
+    **Note:** 
+    
+    I have had several collisions with files that have a "." (dot) in column one of a line.  
+    Maybe a different syntax should be chosen.
+
 2. ***Prompt Text***: These are lines that do not follow the above syntax.  
-    The text is included in the 'current message'.  
+    The text is added to the 'current message'.  
 
 ### The following Key Word Statements are implemented:
-| Key Word | Description                                           |
-|----------|-------------------------------------------------------|
-| .llm     | Define the LLM to be used                             |
-| .clear   | Clear working directories                             |
-| .system  | Create a system message and make it "current message" |
-| .user    | Create a user message and make it "current message"   |
-| .include | Include a file in the "current message"               |
-| .cmd     | Execute a command on the local system                 |
-| .exec    | Start an Iteration with the LLM                       |
+| Key Word   | Description                                                            |
+|------------|------------------------------------------------------------------------|
+| .llm       | Define the LLM to be used                                              |
+| .clear     | Clear working directories                                              |
+| .system    | Create a system message and make it "current message"                  |
+| .user      | Create a user message and make it "current message"                    |
+| .assistant | Imitate a LLM response as example of how you want LLM to respond       |
+| .function  | Imitate a LLM function call as example of how you want LLM to respond  |
+| .include   | Include a file in the "current message"                                |
+| .cmd       | Execute a command on the local system                                  |
+| .exec      | Start an Iteration with the LLM                                        |
 
 
 ## .llm 
@@ -107,6 +121,37 @@ Further prompt lines are added to the "user message" until:
 
 The ***.user*** statement above tells Knowledge Engineer to create a user message. Sub Sequent Prompt lines are added to the user message.
 
+## .assistant 
+The assistant statement is used to create a **_assistant message_** It is sent to the LLM as example of how you want the LLm to respond.
+
+Further prompt lines are added to the "assistant message" until:
+- a '.user', '.function' message is encountered
+- the Iteration is started with a **.exec** key word statement.
+
+#### Example
+
+    .user
+    list the following topics as a definition list:
+    One: One is the loneliest number. Two: Two is the second in the list. Three: Three is at the end.
+    .assistant
+    <definition list>
+    <item>One<definition>One is the loneliest number. </definition></item>
+    <item>Two<definition>Two is the second in the list. </definition></item>
+    <item>Three<definition>Three is at the end.</definition></item>
+    </definition list>
+    .user 
+    Make a definition list of all the topics covered in the esay
+    .exec
+
+The ***.assistant*** statement above "pretends" to be a msg the LLm answered previously, 
+and thereby shows the LLM the format that you want returned.
+
+## .function (deprecated)
+The function statement is used to create a **_function message_** It is sent to the LLM as example of how you want 
+the LLm to respond, i.e. that it call a function.
+
+The ***.function*** statement has not proven to be useful, and therefor is deprecated. 
+
 ## .include 
 The include statement is used to copy the contents of a file, inserting it into the current message. 
 
@@ -155,7 +200,7 @@ The statement above tells Knowledge Engineer to close the "Current Message" and 
 
 # More complex example of a KEPF file:
 
-    .llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
+    .llm "model": "gpt-3.5-turbo-0125"
     .clear "Planning/*"
     .user
     .cmd curl https://openai.com/pricing | lynx -dump -stdin > Planning/openai_pricing.txt
@@ -168,7 +213,7 @@ The statement above tells Knowledge Engineer to close the "Current Message" and 
 ## Description
 First off the .kepf file does not end with a .exec statement but one was implied it is added to the end of the file.
 
-    .llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
+    .llm "model": "gpt-3.5-turbo-0125"
 use OpenAI's Chat GPT 3.5 Turbo
 
     .clear "Planning/*"

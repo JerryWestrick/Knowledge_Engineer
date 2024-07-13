@@ -47,6 +47,7 @@ MISTRAL_API_KEY='API Key'
 CODESTRAL_API_KEY='API Key'
 ANTHROPIC_API_KEY='API Key'
 GROQ_API_KEY='API Key'
+# KE_PROC_DB_URL = one of the following database definitions:
 # PostgreSQL: "postgresql://user:password@localhost/dbname"
 # MySQL: "mysql://user:password@localhost/dbname"
 # SQLite: "sqlite:///path/to/dbfile"

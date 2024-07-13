@@ -9,34 +9,58 @@ OpenAI, Mistral, Anthropic are supported, I am working on OLLama for local LLM e
 (That is a fancy way to say:  "by modifying the syntax of the **.kepf** files.")
 
 # Quick Start
-### Preparation
-    mkdir ke
-    python -m venv .venv
 
-###### Dos/Windows
-    .venv\Scripts\activate
-###### Linux/MacOS
+
+### Preparation linux / mac
+```
+    mkdir ke
+    cd ke
+    python3 -m venv .venv
     source .venv/bin/activate
+```
+###### Preparation Dos/Windows 
+```
+    mkdir ke
+    cd ke
+    python3 -m venv .venv
+    .venv\Scripts\activate
+```
     
 ### Installation
+```
     pip install knowledge-engineer
+```
 
 ### Create New Project
+```
     knowledge_engineer --create=snake
+```
 
 ### Setup Project
+```
     cd snake
     edit ke_process_config.env
+```
 
-Enter Your OpenAI API Key in the following line of the ke_process_config.env file:
+Enter Your API Keys in the ke_process_config.env file:
 
     OPENAI_API_KEY='<Your Open API Key>'
 
 ### execute example Project
+```
     knowledge_engineer --execute
+```
 
 ### Run Your Generated Snake Game
-    python Code/snake.py
+```
+    python Code/snake_game.py
+```
+This proves knowledge-engineer is running. But the game will probably 
+not work, as Chat GPT 3.5 Turbo only gets it right about 1/4 of the 
+time.
+
+Please see getting Started below for an explanation of how to use
+knowledge_engineer.
 
 # Further Documentation
 ## For Users

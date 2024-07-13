@@ -7,11 +7,11 @@ knowledge_engineer = ["*.md"]
 
 [project]
 name = "knowledge_engineer"
-version = "0.6.0"
+version = "0.6.1"
 authors = [
     { name = "Jerry Westrick", email = "jerry@westrick.com" },
 ]
-description = "Engineer GPT Knowledge within a process"
+description = "Engineer GPT Knowledge within a project"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [

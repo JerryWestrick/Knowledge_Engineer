@@ -18,7 +18,7 @@ In order to release a version of the knowledge-engineer package, you need to do 
 
 
 1. uninstall the Knowledge Engineer package from your local environment.
-2. Increment the version no in the setup.cfg file.
+2. Increment the version no in the pyproject.toml file.
 3. Build the distribution files.
 4. Upload the distribution files to the test.pypi repository.
 5. Test the test release.
