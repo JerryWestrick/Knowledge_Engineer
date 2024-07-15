@@ -18,7 +18,13 @@ from httpx import ReadTimeout
 from mistralai.async_client import MistralAsyncClient
 from mistralai.models.chat_completion import ChatMessage
 from openai import AsyncOpenAI
-from rich.prompt import Prompt
+from rich.panel import Panel
+from rich.text import Text
+from rich.console import Console
+from prompt_toolkit import PromptSession
+from prompt_toolkit.styles import Style
+from prompt_toolkit.history import InMemoryHistory
+from prompt_toolkit.key_binding import KeyBindings
 
 from .AI_API_Costs import AI_API_Costs
 from .db import DB
@@ -161,20 +167,83 @@ class AI:
         return await succeed(msg)
 
     async def ask_user(self, question: str, process_name: str) -> dict[str, str]:
-        """The LLM asks the local user for clarification"""
+        """The LLM asks the local user for clarification with improved formatting and advanced line editing."""
 
-        console = Logger.my_console()
-        console.print(f"{'-'*3} {question} {'-'*3}")
-        lines = []
-        while True:
-            line = console.input()
-            if line.strip() == '':
-                break
-            lines.append(line)
+        console = Console()
 
-        user_response = "\n".join(lines)
-        msg = {'name': 'exec', 'role': self.function_role(), 'content': f'user Answer: {user_response}'}
-        return await succeed(msg)
+        # Create a styled question
+        styled_question = Text(question, style="bold cyan")
+
+        # Create a panel for the question
+        question_panel = Panel(
+            styled_question,
+            title=f"[bold green]{process_name}[/bold green]",
+            subtitle="[italic]Enter your response (Ctrl-D to finish)[/italic]",
+            border_style="green",
+            expand=False
+        )
+
+        # Display the question panel
+        console.print(question_panel)
+
+        # Set up key bindings
+        kb = KeyBindings()
+
+        @kb.add('c-d')
+        def _(event):
+            event.app.exit(result=event.app.current_buffer.text)
+
+        # Set up prompt_toolkit session with styling
+        style = Style.from_dict({
+            'prompt': 'ansiyellow bold',
+            'input': 'ansiwhite',
+        })
+        session = PromptSession(
+            history=InMemoryHistory(),
+            style=style,
+            multiline=True,
+            prompt_continuation=lambda width, line_number, is_soft_wrap: '▶ ' if not is_soft_wrap else '  ',
+            key_bindings=kb
+        )
+
+        # Collect user input asynchronously
+        try :
+            user_response = await session.prompt_async("Your response: ",)
+        except EOFError:
+            user_response = session.app.current_buffer.text
+
+        # Display the user's response in a panel
+        response_panel = Panel(
+            Text(user_response, style="yellow"),
+            title="[bold blue]Your Response[/bold blue]",
+            border_style="blue",
+            expand=False
+        )
+        console.print(response_panel)
+
+        msg = {
+            'name': 'exec',
+            'role': self.function_role(),
+            'content': f'User Answer: {user_response}'
+        }
+        return msg
+
+
+    # async def ask_user(self, question: str, process_name: str) -> dict[str, str]:
+    #     """The LLM asks the local user for clarification"""
+    #
+    #     console = Logger.my_console()
+    #     console.print(f"{'-'*3} {question} {'-'*3}")
+    #     lines = []
+    #     while True:
+    #         line = console.input()
+    #         if line.strip() == '':
+    #             break
+    #         lines.append(line)
+    #
+    #     user_response = "\n".join(lines)
+    #     msg = {'name': 'exec', 'role': self.function_role(), 'content': f'user Answer: {user_response}'}
+    #     return await succeed(msg)
 
 
     # async def ask_user(self, question: str, process_name: str) -> dict[str, str]:
