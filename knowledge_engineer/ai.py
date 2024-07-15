@@ -169,7 +169,8 @@ class AI:
     async def ask_user(self, question: str, process_name: str) -> dict[str, str]:
         """The LLM asks the local user for clarification with improved formatting and advanced line editing."""
 
-        console = Console()
+        console = self.log._console
+        # console = Console()
 
         # Create a styled question
         styled_question = Text(question, style="bold cyan")

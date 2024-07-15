@@ -270,7 +270,7 @@ async def run_ke(args: argparse.Namespace):
             return
 
         if args.log is not None:
-            log.log_file(args.log)
+            log.set_log_file(args.log)
             log.info(f"Logging to: {args.log}")
 
         if args.step:
