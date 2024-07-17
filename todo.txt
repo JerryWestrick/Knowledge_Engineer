@@ -15,7 +15,7 @@ Todo: The file create_new_process.py, creates the example process structure.
       A command "Make Default" is required that saves the structure and contents of a proces,
       To be used in future '-create' command.  This will simplify development.
 
-Todo: add syntax for .llm, .clear, .include, and .cmd lines
+Done: add syntax for .llm, .clear, .include, and .cmd lines
 
 Todo: need a repository for example processes
 
@@ -23,7 +23,7 @@ Todo: Write macro values to a file, so that they will be reloaded.
 
 Todo: .macros line to insert new values into macros.
 
-Todo: add [05:54:56.354]      Step::╭─ Step: rs:"Prompts/2- Create Relationship Names"
+Done: add [05:54:56.354]      Step::╭─ Step: rs:"Prompts/2- Create Relationship Names"
           [05:54:56.355]      Step::│ Model: "gpt-4-1106-preview", Temperature: 0, Max Tokens: 50,000, Response Format: "json_object"
       To the log files.
 
@@ -33,7 +33,11 @@ Todo: Documentation for macros
 
 Todo: Error in --step=99*  if there is no matching file...  Need to add a check for this.
 
-Todo: Need some sort of "Conversation" mode.  Where the user can see the answers, and decide to say "Continue".
+Done: Need some sort of "Conversation" mode.  Where the user can see the answers, and decide to say "Continue".
+      function LLM can call called ask_user()
 
-Todo: update the log file as the process runs.
+Done: update the log file as the process runs.
 
+Done: The new terminal output is awesome.  I have changed the -log Logs/Run-01-Database.log to output color and formatting.
+      This color and formatting is not readable, the program 'aha -f Logs/Run-01-Database.log > Logs/Run-01-Database.html'
+      creates a wonderfully looking html output of the terminal.  The conversion should be done automatically!

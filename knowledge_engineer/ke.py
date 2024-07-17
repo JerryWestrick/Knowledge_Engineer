@@ -4,6 +4,7 @@ import glob
 import json
 import shutil
 import time
+import subprocess
 from json import JSONDecodeError
 from pathlib import Path
 
@@ -99,7 +100,7 @@ def main():
 
     execution_control_group.add_argument("-s", "--step", metavar="name", type=str,
                                          help="Execute the specified step in the process")
-    execution_control_group.add_argument("--log", metavar="FILE", type=str, help="Log output to the specified file")
+    # execution_control_group.add_argument("--log", metavar="FILE", type=str, help="Log output to the specified file")
 
     information_group = parser.add_argument_group('Information')
     information_group.add_argument("-m", "--models", action='store_true', help="List all available OpenAI models")
@@ -176,7 +177,7 @@ def main():
 
 async def execute_step(proc_name: str, step_name: str) -> Step:
     prompt_dir = os.getenv('KE_PROC_DIR_PROMPTS')
-
+    log_dir = os.getenv('KE_PROC_DIR_LOGS')
     if step_name.startswith(prompt_dir):
         prompt_name = step_name
     else:
@@ -249,7 +250,19 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
                 else:
                     log.error(f"Unknown file type {f}", None)
 
+    # Start Logging
+    name = prompt_name[len(prompt_dir) + 1:-5]
+    log_file_name = f"{log_dir}/{proc_name}-{name}.log"
+    log.set_log_file(log_file_name)
+    log.info(f"Logging to: {log_file_name}")
+
     await step.run(proc_name, messages=messages)
+
+    command = f"aha -f {log_file_name} > {log_file_name[:-4]}.html"
+
+    log.info(f"converting log to html...")
+    subprocess.run(command, shell=True)
+    log.info(f"done")
 
     return step
 
@@ -268,10 +281,6 @@ async def run_ke(args: argparse.Namespace):
         if args.list:
             list_all_processes()
             return
-
-        if args.log is not None:
-            log.set_log_file(args.log)
-            log.info(f"Logging to: {args.log}")
 
         if args.step:
             try:

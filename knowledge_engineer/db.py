@@ -95,10 +95,6 @@ class DB:
 
     def read(self, key: str, process_name: str = ''):
 
-        # if process_name:
-        #     full_path = self.path / process_name / key
-        # else:
-        #     full_path = self.path / key
         full_path = self.path / key
         if not full_path.is_file():
             self.log.error(f"Invalid Memory Item.  \nPath not found: {full_path}", None)

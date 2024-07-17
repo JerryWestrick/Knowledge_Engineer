@@ -24,7 +24,7 @@ class Logger:
     def set_log_file(cls, log_file_name: str) -> None:
         log_file_fn = open(log_file_name, "wt")
         cls._log_file = Console(file=log_file_fn, width=1000, force_terminal=True)
-        cls.print(f"Logging to: {log_file_name}")
+        # cls.print(f"Logging to: {log_file_name}")
 
     @classmethod
     def print(cls, message: str) -> None:

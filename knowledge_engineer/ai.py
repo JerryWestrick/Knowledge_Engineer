@@ -156,7 +156,7 @@ class AI:
         """Execute a command that was defined in a prompt file (.kepf)"""
 
         answer = self.exec_subprocess(command)
-        msg = {'name': 'cmd', 'role': 'user', 'content': f'.cmd {answer}'}
+        msg = {'name': 'cmd', 'role': 'user', 'content': f'result of "{command}" is {answer}'}
         return await succeed(msg)
 
     async def execute_cmd_ai(self, command: str, process_name: str) -> dict[str, str]:
@@ -230,44 +230,30 @@ class AI:
         return msg
 
 
-    # async def ask_user(self, question: str, process_name: str) -> dict[str, str]:
-    #     """The LLM asks the local user for clarification"""
-    #
-    #     console = Logger.my_console()
-    #     console.print(f"{'-'*3} {question} {'-'*3}")
-    #     lines = []
-    #     while True:
-    #         line = console.input()
-    #         if line.strip() == '':
-    #             break
-    #         lines.append(line)
-    #
-    #     user_response = "\n".join(lines)
-    #     msg = {'name': 'exec', 'role': self.function_role(), 'content': f'user Answer: {user_response}'}
-    #     return await succeed(msg)
+    async def load_files(self, filenames: str, process_name: str) -> dict[str, str]:
+        """The LLM asks to receive files from the local machine."""
 
 
-    # async def ask_user(self, question: str, process_name: str) -> dict[str, str]:
-    #     """Asynchronously ask the user a question and get multi-line input."""
-    #     print(f"\n--- {process_name} ---")
-    #     print(f"AI Asks: {question}")
-    #     print("(Enter your multi-line response. Type 'END' on a new line when finished.)")
-    #
-    #     lines = []
-    #     while True:
-    #         line = await ainput()
-    #         if line.strip().upper() == 'END':
-    #             break
-    #         lines.append(line)
-    #
-    #     user_response = "\n".join(lines)
-    #
-    #     msg = {
-    #         'name': 'exec',
-    #         'role': self.function_role(),
-    #         'content': f'User Answer: {user_response}'
-    #     }
-    #     return msg
+        try:
+            file_contents = self.memory.read(filename, process_name=process_name)
+
+        except Exception as err:
+            self.log.error(f"Error while reading file for AI... ", err)
+            result = await succeed({'role': self.function_role(),
+                                    'name': 'read_file',
+                                    'content': f'ERROR file not found: {filename}'
+                                    })
+            return result
+
+        return await succeed({'name': 'read_file', 'content': file_contents})
+        msg = {
+            'name': 'exec',
+            'role': self.function_role(),
+            'content': f'User Answer: {user_response}'
+        }
+        return msg
+
+
 
     functions = [
         {
@@ -446,13 +432,6 @@ class AI:
     def from_json(cls, param):
         return cls(**param)
 
-    # def append_message(self, msg: dict[str, str], step):
-    #     if self.llm_name == 'openai':
-    #         self.messages.append(msg)
-    #     elif self.llm_name == 'mistral':
-    #         self.messages.append(ChatMessage(role=msg['role'], content=msg['content']))
-    #     self.log.umsg(step, msg)
-
 
 class OpenAI(AI):
 
@@ -467,9 +446,6 @@ class OpenAI(AI):
 
     def function_role(self) -> str:
         return 'function'
-
-    # def function_result(self, name: str, content: str, tool_id: str):
-    #     return {'role': "tool", 'content': content, 'tool_call_id': tool_id}
 
     def make_msg(self, msg: dict[str, str]) -> dict[str, str] | ChatMessage:
         return msg
@@ -661,12 +637,16 @@ class Anthropic(AI):
                 self.anthropic_tools.append(new_func)
 
         system_msg = ''
-        if messages[0]['role'] == 'system':
-            system_msg = messages.pop(0)['content']
+        for mno, msg in enumerate(messages):
+            if msg['role'] == 'system':
+                system_msg = messages.pop(mno)['content']
+            elif msg['name'] == 'cmd':
+                del msg['name']
 
         repeat = True
         while repeat:
             repeat = False
+
             # Call Anthropic
             try:
                 response = await self.client.messages.create(
