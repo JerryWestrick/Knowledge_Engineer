@@ -1,5 +1,6 @@
 AI_API_Costs = {
 
+    "gpt-4o-mini": {"llm": "openai", "model": "gpt-4o-mini", "input": 0.00015, "output": 0.00075, "context": 128000, },
     "gpt-4o": {"llm": "openai", "model": "gpt-4o", "input": 0.005, "output": 0.015, "context": 128000, },
     "gpt-4-1106-preview": {"llm": "openai","model": "gpt-4-1106-preview", "input": 0.01, "output": 0.03, "context": 128000, },
     "gpt-4": {"llm": "openai", "model": "gpt-4", "input": 0.03, "output": 0.06, "context": 8000, },

@@ -41,3 +41,11 @@ Done: update the log file as the process runs.
 Done: The new terminal output is awesome.  I have changed the -log Logs/Run-01-Database.log to output color and formatting.
       This color and formatting is not readable, the program 'aha -f Logs/Run-01-Database.log > Logs/Run-01-Database.html'
       creates a wonderfully looking html output of the terminal.  The conversion should be done automatically!
+
+Done: Step=Admin* only executes one step.   Exec=Admin* executes all matching steps...
+
+Todo: Update documentation
+
+Todo: a wget function to download web pages from internet.
+
+Todo: Make a functions and routines executable from both sides.  (Allowing for local side exec and ask_user ect)

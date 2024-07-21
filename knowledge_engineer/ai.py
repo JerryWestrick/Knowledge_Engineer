@@ -235,13 +235,13 @@ class AI:
 
 
         try:
-            file_contents = self.memory.read(filename, process_name=process_name)
+            file_contents = self.memory.read(filenames, process_name=process_name)
 
         except Exception as err:
             self.log.error(f"Error while reading file for AI... ", err)
             result = await succeed({'role': self.function_role(),
                                     'name': 'read_file',
-                                    'content': f'ERROR file not found: {filename}'
+                                    'content': f'ERROR file not found: {filenames}'
                                     })
             return result
 
@@ -640,7 +640,7 @@ class Anthropic(AI):
         for mno, msg in enumerate(messages):
             if msg['role'] == 'system':
                 system_msg = messages.pop(mno)['content']
-            elif msg['name'] == 'cmd':
+            elif 'name' in msg and msg['name'] == 'cmd':
                 del msg['name']
 
         repeat = True

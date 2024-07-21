@@ -30,16 +30,20 @@ log = Logger(namespace="ke", debug=True)
 memory = DB()
 
 
-async def execute_process(process_name: str):
-    log.info(f'Begin Execution of Process "{process_name}"')
+async def execute_process(process_name: str, step_glob: str):
+    if step_glob == '':
+        step_glob = "*"
+
+    log.info(f'Begin Execution of Process "{process_name} steps {step_glob}"')
     step_no: int = 1
     start_time: float = time.time()
     e_stats = {}
     steps_dir = os.getenv("KE_PROC_DIR_PROMPTS")
-    full_step_names = memory.glob_files(f"{steps_dir}/*.kepf")
+    full_step_names = memory.glob_files(f"{steps_dir}/{step_glob}.kepf")
     full_step_names.sort()
-    for full_file_names in full_step_names:
-        dirs = full_file_names.split('/')
+    log.info(f'Found "{full_step_names}"')
+    for full_file_name in full_step_names:
+        dirs = full_file_name.split('/')
         sname = dirs[-1]
         # pname = '/'.join(dirs[:-2])
         # step = Step.from_file(pname, sname)
@@ -95,8 +99,8 @@ def main():
     process_management_group.add_argument("-l", "--list", action='store_true',
                                           help="List all steps in the current process")
     execution_control_group = parser.add_argument_group('Execution Control')
-    execution_control_group.add_argument("-e", "--execute", action='store_true',
-                                         help="Execute all steps in the current process")
+    execution_control_group.add_argument("-e", "--exec", metavar="exec", type=str,
+                                         help="Execute all steps in the current process matched by glob")
 
     execution_control_group.add_argument("-s", "--step", metavar="name", type=str,
                                          help="Execute the specified step in the process")
@@ -192,6 +196,8 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
     if prompt_name[-5:] != '.kepf':
         prompt_name = prompt_name + '.kepf'
 
+    log.info(f'Executing "{prompt_name}"')
+
     try:
         messages = memory.read_msgs(prompt_name, process_name=proc_name)
     except Exception as err:
@@ -269,13 +275,15 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
 
 async def run_ke(args: argparse.Namespace):
     # Does Directory have configuration file?
-    if not os.path.exists(f"./ke_process_config.env"):
+    default_dir = os.getcwd()
+    dotenv_file = f'{default_dir}/ke_process_config.env'
+    if not os.path.exists(dotenv_file):
         log.error(f"[No ke_process_config.env file]\n"
-                  f"The Directory {os.getcwd()} is not a KnowledgeEngineer Process Directory", None)
+                  f"The Directory {default_dir} is not a KnowledgeEngineer Process Directory", None)
         exit(2)
 
-    proc_name = Path(os.getcwd()).stem
-    load_dotenv('ke_process_config.env')
+    proc_name = Path(default_dir).stem
+    load_dotenv(dotenv_file)
 
     try:
         if args.list:
@@ -291,8 +299,8 @@ async def run_ke(args: argparse.Namespace):
                 raise err
             return
 
-        if args.execute:
-            await execute_process(proc_name)
+        if args.exec:
+            await execute_process(proc_name, args.exec)
             return
 
     except Exception as err:
