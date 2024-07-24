@@ -5,8 +5,11 @@ Todo: In order to force the LLM into a response that we can better understand/wo
 
 
 Todo: add a .wget local command to access web-pages
+Done: a www_get(url='') function to have AI download web pages from internet.
 
-Todo: The 'Continue?' prompt with gpt 3.5 turbo does not seam to work...
+Todo: Make a functions and routines executable from both sides.  (Allowing for local side exec and ask_user ect)
+
+Done: The 'Continue?' prompt with gpt 3.5 turbo does not seam to work...
 
 Todo: Add routine to update OpenAI_API_Costs.py
 
@@ -35,7 +38,6 @@ Todo: Have problem with macro replacement.
       This will allow values to be prepared before they are substituted.
       It also matches user expectancy
 
-
 Todo: Documentation for macros
 
 Todo: Error in --step=99*  if there is no matching file...  Need to add a check for this.
@@ -53,8 +55,6 @@ Done: Step=Admin* only executes one step.   Exec=Admin* executes all matching st
 
 Todo: Update documentation
 
-Todo: a wget function to download web pages from internet.
-
-Todo: Make a functions and routines executable from both sides.  (Allowing for local side exec and ask_user ect)
-
 Done: Logging to html support for Mac and Windows.
+
+Todo: if Log Directory does not exist the program abends with no message...

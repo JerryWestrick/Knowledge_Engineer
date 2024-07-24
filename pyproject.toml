@@ -7,7 +7,7 @@ knowledge_engineer = ["*.md"]
 
 [project]
 name = "knowledge_engineer"
-version = "0.6.7"
+version = "0.6.8"
 authors = [
     { name = "Jerry Westrick", email = "jerry@westrick.com" },
 ]
@@ -32,7 +32,8 @@ dependencies = [
     "aioconsole",
     "knowledge_engineer",
     "prompt-toolkit",
-    "ansi2html"
+    "ansi2html",
+    "bs4"
 ]
 
 [project.scripts]

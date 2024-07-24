@@ -9,6 +9,7 @@ import aiohttp
 import anthropic
 import httpx
 from aioconsole import ainput
+from bs4 import BeautifulSoup
 from groq import AsyncGroq
 
 from anthropic import AsyncAnthropic
@@ -112,6 +113,48 @@ class AI:
         result = await self.db.execute(query=sql)
         # self.log.info(f"Database Update Result: {result}")
         return await succeed({'role': self.function_role(), 'name': 'execute_db', 'content': str(result)})
+
+    async def readfile(self, filename: str, process_name: str):
+
+        try:
+            file_contents = self.memory.read(filename, process_name=process_name)
+
+        except Exception as err:
+            self.log.error(f"Error while reading file for AI... ", err)
+            result = await succeed({'role': self.function_role(),
+                                    'name': 'read_file',
+                                    'content': f'ERROR file not found: {filename}'
+                                    })
+            return result
+
+        return await succeed({'name': 'read_file', 'content': file_contents})
+
+    async def get_webpage_content(self, url: str) -> str:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                content = await response.text()
+        soup = BeautifulSoup(content, 'html.parser')
+        for script in soup(["script", "style"]):
+            script.decompose()
+        text = soup.get_text()
+        lines = (line.strip() for line in text.splitlines())
+        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+        text = '\n'.join(chunk for chunk in chunks if chunk)
+        return text
+
+    async def www_get(self, url: str, process_name: str):
+
+        try:
+            page_contents = await self.get_webpage_content(url)
+        except Exception as err:
+            self.log.error(f"Error while retrieving url for AI... ", err)
+            result = {'role': self.function_role(),
+                    'name': 'www_get',
+                    'content': f'ERROR url not returned: {url}'
+                    }
+            return result
+
+        return await succeed({'name': 'www_get', 'content': page_contents})
 
     async def readfile(self, filename: str, process_name: str):
 
@@ -267,6 +310,20 @@ class AI:
             },
         },
         {
+            "name": "www_get",
+            "description": "Read a webpage url and return the contents",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "The url of the web page to read",
+                    },
+                },
+                "required": ["url"],
+            },
+        },
+        {
             "name": "writefile",
             "description": "Write the contents to a named file on the local file system",
             "parameters": {
@@ -329,6 +386,7 @@ class AI:
     ]
     available_functions = {
         "readfile": readfile,
+        "www_get": www_get,
         "writefile": writefile,
         "exec": execute_cmd_ai,
         "query_db": query_db_ai,
