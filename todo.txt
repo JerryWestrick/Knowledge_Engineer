@@ -27,7 +27,14 @@ Done: add [05:54:56.354]      Step::╭─ Step: rs:"Prompts/2- Create Relations
           [05:54:56.355]      Step::│ Model: "gpt-4-1106-preview", Temperature: 0, Max Tokens: 50,000, Response Format: "json_object"
       To the log files.
 
-Todo: Have problem with macro replacement.  Seams to fail though I do not know exactly when.
+Todo: Have problem with macro replacement.
+      Macros are substituted during building of message list.
+      The creation of the step is done after building of messages.
+      The .LLM statement is part of building messages so macros substitution is too early
+      The Macros should be executed at last minute.
+      This will allow values to be prepared before they are substituted.
+      It also matches user expectancy
+
 
 Todo: Documentation for macros
 
@@ -49,3 +56,5 @@ Todo: Update documentation
 Todo: a wget function to download web pages from internet.
 
 Todo: Make a functions and routines executable from both sides.  (Allowing for local side exec and ask_user ect)
+
+Done: Logging to html support for Mac and Windows.

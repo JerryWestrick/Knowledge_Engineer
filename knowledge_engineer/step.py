@@ -29,6 +29,7 @@ class Step:
         if macros is None:
             self.macros = {}
 
+
         rf = response_format
         if response_format:
             rf = {"type": f"{response_format}"}

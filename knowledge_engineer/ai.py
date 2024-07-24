@@ -208,8 +208,8 @@ class AI:
         )
 
         # Collect user input asynchronously
-        try :
-            user_response = await session.prompt_async("Your response: ",)
+        try:
+            user_response = await session.prompt_async("Your response: ", )
         except EOFError:
             user_response = session.app.current_buffer.text
 
@@ -229,10 +229,8 @@ class AI:
         }
         return msg
 
-
     async def load_files(self, filenames: str, process_name: str) -> dict[str, str]:
         """The LLM asks to receive files from the local machine."""
-
 
         try:
             file_contents = self.memory.read(filenames, process_name=process_name)
@@ -252,8 +250,6 @@ class AI:
             'content': f'User Answer: {user_response}'
         }
         return msg
-
-
 
     functions = [
         {
@@ -800,7 +796,6 @@ class Ollama(AI):
                 else:
                     self.answer += f"\n{msg['content']}"
 
-
             # # Call Anthropic
             # try:
             #     response = await self.client.messages.create(
@@ -867,7 +862,6 @@ class Ollama(AI):
             #         self.log.ret_msg(step, result)
             #         repeat = True
 
-
             # Gather Answer
             # self.e_stats['prompt_tokens'] = \
             #     self.e_stats['prompt_tokens'] + response.usage.input_tokens
@@ -903,9 +897,9 @@ class GroqAI(AI):
             for func in self.functions:
                 new_func = {"type": "function",
                             "function": {
-                                 "name": func["name"],
-                                 "description": func["description"],
-                                 "parameters": func["parameters"],
+                                "name": func["name"],
+                                "description": func["description"],
+                                "parameters": func["parameters"],
                             }}
                 self.groq_tools.append(new_func)
 
@@ -946,7 +940,8 @@ class GroqAI(AI):
                     self.log.ai_tool_call(step, function_name, call_args)
                     rtn = self.available_functions[function_name]
                     result = await rtn(self, **call_args, process_name=process_name)
-                    new_msg = {"role": "tool", "tool_call_id": call_id, "name": function_name, "content": str(result['content'])}
+                    new_msg = {"role": "tool", "tool_call_id": call_id, "name": function_name,
+                               "content": str(result['content'])}
                     self.messages.append(new_msg)
                     ret_msg = {""}
                     self.log.ret_msg(step, result)
@@ -956,7 +951,6 @@ class GroqAI(AI):
                 self.log.ai_msg(step, message.content, stop_reason)
                 self.answer += f"\n{message.content}"
 
-
             # Gather Answer
             self.e_stats['prompt_tokens'] = \
                 self.e_stats['prompt_tokens'] + response.usage.prompt_tokens
@@ -964,8 +958,6 @@ class GroqAI(AI):
                 self.e_stats['completion_tokens'] + response.usage.completion_tokens
 
         return False
-
-
 
 
 if __name__ == "__main__":

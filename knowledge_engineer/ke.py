@@ -10,6 +10,8 @@ from pathlib import Path
 
 import sys
 import traceback
+
+from ansi2html import Ansi2HTMLConverter
 from rich.traceback import install
 
 
@@ -264,13 +266,52 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
 
     await step.run(proc_name, messages=messages)
 
-    command = f"aha -f {log_file_name} > {log_file_name[:-4]}.html"
+    # command = f"ansi2html -f {log_file_name} > {log_file_name[:-4]}.html"
+    #
+    # log.info(f"converting log to html...")
+    # subprocess.run(command, shell=True)
+    # log.info(f"done")
 
-    log.info(f"converting log to html...")
-    subprocess.run(command, shell=True)
-    log.info(f"done")
-
+    convert_log_to_html(log_file_name, f"{log_file_name[:-4]}.html")
     return step
+
+
+def convert_log_to_html(input_file, output_file):
+    # Read the input file
+    log.info(f"converting {input_file} to {output_file}")
+    with open(input_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # Create an instance of the converter
+    conv = Ansi2HTMLConverter(inline=True)
+
+    # Convert ANSI to HTML
+    html_content = conv.convert(content)
+
+    # Create a full HTML document
+    full_html = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Log Viewer</title>
+        <style>
+            body {{ font-family: monospace; background-color: #1e1e1e; color: #d4d4d4; }}
+            .log-container {{ white-space: pre-wrap; word-wrap: break-word; }}
+        </style>
+    </head>
+    <body>
+        <div class="log-container">
+            {html_content}
+        </div>
+    </body>
+    </html>
+    """
+
+    # Write the HTML content to the output file
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(full_html)
 
 
 async def run_ke(args: argparse.Namespace):
