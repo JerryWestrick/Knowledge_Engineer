@@ -65,12 +65,12 @@ class Logger:
         txt = content.replace('\n', '\\n')
         self.print(f"{self.ts()}{self._format_head()}[deep_sky_blue1]{'AI ('+stop_reason+')':>14}[/] [green][{txt}][/]")
 
-    def ai_tool_call(self, step, func_name: str, arg_str: str):
+    def ai_tool_call(self, id, func_name: str, arg_str: str):
         args = json.loads(arg_str) if isinstance(arg_str, str) else arg_str
         fn = f"[deep_sky_blue1]{func_name:>14}[/]"
 
         func_actions = {
-            'read_file': lambda: f"({args['name']})",
+            'read_file': lambda: f"({args['name']}):",
             'write_file': lambda: f"({args['name']}, ...)[green]{[arg_str]}[/]",
             'replace': lambda: f"({args['name']}, ...)[green]{[arg_str]}[/]",
             'patch': lambda: f"({args['patch_commands'][:50]}...)",
@@ -81,10 +81,11 @@ class Logger:
 
         action_result = func_actions.get(func_name, lambda: f"({args.get('filename', '')}, ...)[green]{[arg_str]}[/]")()
         self.print(f"{self.ts()}{self._format_head()}{fn} {action_result}")
+        self.print(f"{self.ts()}{self._format_head()} [deep_sky_blue1]{'call_id':>13}[/] [green]{id}[/]")
 
-    def ret_msg(self, step, result: Dict[str, str]):
+    def ret_msg(self, id, result: Dict[str, str]):
         txt = result['content'].replace('\n', '\\n')
-        self.print(f"{self.ts()}{self._format_head()}[medium_orchid]{'return':>14}[/] [green]{result['name']}:: {txt}[/]")
+        self.print(f"{self.ts()}{self._format_head()}[medium_orchid]{'return':>14}[/] [green]{result['name']}({id}):: {txt}[/]")
 
     def error(self, msg: str, err: Optional[Exception] = None):
         trace_back_msg = self._format_traceback(err) if err else ''

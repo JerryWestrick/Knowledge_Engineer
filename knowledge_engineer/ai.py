@@ -552,7 +552,7 @@ class OpenAI(AI):
                     function_name = function_call.name
                     function_args = json.loads(function_call.arguments)
                     # response_message['function_call'] = {'name': call.name, 'arguments': call.arguments}
-                    self.log.ai_tool_call(step, function_name, function_args)  # Display with last message
+                    self.log.ai_tool_call(0, function_name, function_args)  # Display with last message
                     try:
                         new_msg = await self.available_functions[function_name](
                             self,
@@ -570,7 +570,7 @@ class OpenAI(AI):
                          "name": function_name,
                          "content": new_msg['content']}
                     )
-                    self.log.ret_msg(step, new_msg)
+                    self.log.ret_msg(0, new_msg)
                     repeat = True
 
         # Gather Answer
@@ -636,11 +636,11 @@ class Mistral(AI):
                     function_call = tool_call.function
                     function_name = function_call.name
                     function_args = json.loads(function_call.arguments)
-                    self.log.ai_tool_call(step, function_name, function_args)
+                    self.log.ai_tool_call(0, function_name, function_args)
                     rtn = self.available_functions[function_name]
                     new_msg = await rtn(self, **function_args, process_name=process_name)
                     self.messages.append(ChatMessage(**new_msg))
-                    self.log.ret_msg(step, new_msg)
+                    self.log.ret_msg(0, new_msg)
                 repeat = True
             else:
                 self.log.ai_msg(step, text, finish_reason)
@@ -746,7 +746,7 @@ class Anthropic(AI):
                 elif typ == "tool_use":
                     content_blocks.append(
                         {"type": "tool_use", "id": block.id, "name": block.name, "input": block.input})
-                    self.log.ai_tool_call(step, block.name, block.input)
+                    self.log.ai_tool_call(block.id, block.name, block.input)
             self.messages.append({"role": "assistant", "content": content_blocks})
 
             # Begin Processing response
@@ -765,7 +765,7 @@ class Anthropic(AI):
                         {"type": "tool_result", "tool_use_id": block.id, "content": result['content']}
                     ]}
                     self.messages.append(new_msg)
-                    self.log.ret_msg(step, result)
+                    self.log.ret_msg(block.id, result)
                     repeat = True
 
             # Gather Answer
@@ -849,7 +849,7 @@ class Ollama(AI):
                     result = await rtn(self, **function_call, process_name=process_name)
                     new_msg = {"role": "user", "content": result['content']}
                     self.messages.append(new_msg)
-                    self.log.ret_msg(step, result)
+                    self.log.ret_msg(0, result)
                     repeat = True
                 else:
                     self.answer += f"\n{msg['content']}"
@@ -995,14 +995,14 @@ class GroqAI(AI):
                     function_name = tool_call.function.name
                     call_args = json.loads(tool_call.function.arguments)
                     call_id = tool_call.id
-                    self.log.ai_tool_call(step, function_name, call_args)
+                    self.log.ai_tool_call(0, function_name, call_args)
                     rtn = self.available_functions[function_name]
                     result = await rtn(self, **call_args, process_name=process_name)
                     new_msg = {"role": "tool", "tool_call_id": call_id, "name": function_name,
                                "content": str(result['content'])}
                     self.messages.append(new_msg)
                     ret_msg = {""}
-                    self.log.ret_msg(step, result)
+                    self.log.ret_msg(0, result)
                     repeat = True
             else:
                 content = {"type": "text", "text": message.content, "role": "Assistant"}

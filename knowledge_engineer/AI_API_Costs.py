@@ -20,10 +20,10 @@ AI_API_Costs = {
     "open-mixtral-8x22b": {"llm": "mistral", "model": "open-mixtral-8x22b", "input": 2.00 / 1000, "output": 6.0 / 1000, "context": 64000},
     
     # Anthropic models
-    "claude-3-5-sonnet-20240620": {"llm": "anthropic", "model": "claude-3-5-sonnet-20240620", "input": 3.00 / 1000000, "output": 15.00 / 1000000, "context": 200000},
-    "claude-3-opus-20240229": {"llm": "anthropic", "model": "claude-3-opus-20240229", "input": 15.0 / 1000000, "output": 75.0 / 1000000, "context": 200000},
-    "claude-3-sonnet-20240229": {"llm": "anthropic", "model": "claude-3-sonnet-20240229", "input": 3.0 / 1000000, "output": 15.0 / 1000000, "context": 200000},
-    "claude-3-haiku-20240307": {"llm": "anthropic", "model": "claude-3-haiku-20240307", "input": 0.25 / 1000000, "output": 1.25 / 1000000, "context": 200000},
+    "claude-3-5-sonnet-20240620": {"llm": "anthropic", "model": "claude-3-5-sonnet-20240620", "input": 3.00 / 1000000, "output": 15.00 / 1000000, "context": 4096},
+    "claude-3-opus-20240229": {"llm": "anthropic", "model": "claude-3-opus-20240229", "input": 15.0 / 1000000, "output": 75.0 / 1000000, "context": 4096},
+    "claude-3-sonnet-20240229": {"llm": "anthropic", "model": "claude-3-sonnet-20240229", "input": 3.0 / 1000000, "output": 15.0 / 1000000, "context": 4096},
+    "claude-3-haiku-20240307": {"llm": "anthropic", "model": "claude-3-haiku-20240307", "input": 0.25 / 1000000, "output": 1.25 / 1000000, "context": 4096},
     
     # Legacy Anthropic models
     "claude-2.1": {"llm": "anthropic", "model": "claude-2.1", "input": 8.00 / 1000000, "output": 24.00 / 1000000, "context": 200000},
