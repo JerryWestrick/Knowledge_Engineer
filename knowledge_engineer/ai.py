@@ -22,6 +22,7 @@ from openai import AsyncOpenAI
 from rich.panel import Panel
 from rich.text import Text
 from rich.console import Console
+from rich import print
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 from prompt_toolkit.history import InMemoryHistory
@@ -732,6 +733,9 @@ class Anthropic(AI):
                            )
                 self.log.error(err_msg, err)
                 response = {'role': 'system', 'error': err_msg}
+                self.log.print(f"List of messages:\n\n")
+                with open("messages.json", "w") as file:
+                    json.dump(messages, file, indent=4)
                 raise err
 
             # Build AI response and add it to messages
@@ -749,24 +753,20 @@ class Anthropic(AI):
                     self.log.ai_tool_call(block.id, block.name, block.input)
             self.messages.append({"role": "assistant", "content": content_blocks})
 
-            # Begin Processing response
-            function_name = None
-            function_args = None
-            text = ''
-            stop_reason = response.stop_reason
-
+            response_blocks = []
             for block in response.content:
                 if block.type == 'tool_use':
                     function_name = block.name
                     function_args = block.input
                     rtn = self.available_functions[function_name]
                     result = await rtn(self, **function_args, process_name=process_name)
-                    new_msg = {"role": "user", "content": [
+                    response_blocks.append(
                         {"type": "tool_result", "tool_use_id": block.id, "content": result['content']}
-                    ]}
-                    self.messages.append(new_msg)
+                    )
                     self.log.ret_msg(block.id, result)
                     repeat = True
+            if response.stop_reason != 'end_turn':
+                self.messages.append({"role": "user", "content": response_blocks})
 
             # Gather Answer
             self.e_stats['prompt_tokens'] = \
