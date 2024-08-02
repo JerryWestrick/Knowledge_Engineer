@@ -65,7 +65,7 @@ knowledge_engineer.
 # Further Documentation
 ## For Users
 
-- The [Getting Started](Documentation/Getting%20Started/Getting%20Started.pdf) document contains a good place to start.  It is a PDF file that is a good introduction to the example project you just created and ran.  It is also available in HTML format.
+- The [Getting Started](Documentation/Getting%20Started/Getting%20Started.md) document contains a good place to start.  It is a PDF file that is a good introduction to the example project you just created and ran.  It is also available in HTML format.
 
 - The [KEPF Language Reference](Documentation/KEPF%20Language%20Reference/KEPF%20Language%20Reference.md) document is a good place to look into the options and syntax of the Domain Specific Language (DSL) used to create the prompts for the LLMs.  It is also available in HTML format.
 

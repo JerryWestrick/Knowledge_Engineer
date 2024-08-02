@@ -18,7 +18,7 @@ This works better, **_but does not_** give us an attention span 4 times longer.
 
 We are pushing up a curve of diminishing returns!
 
-# Current Knowledge Management Solutions
+# Standard Knowledge Management Solutions
 
 There are 2 **_standard_** solutions for managing knowledge size:
 1. Summarizing and
@@ -64,7 +64,7 @@ In IT, we have long known that the more domain knowledge you put into your solut
 
 But let's start from the beginning...
 
-## Aladin AI grants your wish
+## 1) Aladin AI grants your wish
 
 We could ask AI to **_"Write a Snake Game using pygame."_**, and expect it to output the entire python program just like that.  If you fudge with the prompts enough you might even get it to work every once in a while.  
 
@@ -73,9 +73,40 @@ snake game implementations that the AI was trained on.
 (The snake game is a typical intermediate exercise that is given to
 many programmers).
 
-Do something useful beyond that? That is simply not within the attention span of current LLMs.
+The game generated is basic running example and needs lots more to be a releasable product. 
+Now to do something useful beyond that? That is simply not within the attention span of current LLMs.
 
 #### Okay, what now?
+
+# 2) Agent of Agents
+
+An "agent of agents" strategy typically refers to a hierarchical or nested approach to AI systems, 
+where higher-level AI agents coordinate or manage multiple lower-level AI agents. 
+This structure can be used to tackle complex problems by breaking them down into subtasks.
+
+Key aspects of this strategy include:
+
+- **Hierarchy**: Multiple layers of AI agents, each with different responsibilities.
+- **Specialization**: Lower-level agents often specialize in specific tasks or domains.
+- **Coordination**: Higher-level agents manage and coordinate the actions of lower-level agents.
+- **Scalability**: This approach can potentially handle very complex problems by distributing tasks.
+- **Flexibility**: The system can be reconfigured or expanded by adding or modifying agents at different levels.
+
+This strategy has potential applications in areas like:
+
+Large-scale optimization problems
+Multi-agent robotics systems
+Complex decision-making scenarios
+Distributed AI systems
+
+### This method lets AI break the problem into pieces and solve them individually
+
+
+# 3) Knowledge Engineering
+In knowledge Engineering you are the engineer.  
+Your Know-How of how to divide the problem is required, and supported.  
+
+For example lets contemplate the most extreme case.
 
 ## Breaking The problem into Pieces
 
@@ -85,19 +116,19 @@ We need to manage the Knowledge:
 - The problem within the step needs to be singularly focused on one problem.  
 - Each output needs to be designed to output exactly what is required 
 for the next step. 
-- We need a system that is strictly top down without cyclic complications.  
+- We need a system that is DAG i.e. strictly top down without circular complications.  
 - each step needs its own problem domain.
 - The AI must know how to solve the problem within the domain of each step.
 
-Sounds impossible?  Well, It is not.  there is a well known and methodology 
-meets all the conditions.  It is one of the most studied IT Methodologies 
+Sounds impossible?  Well, It is not.  There is a well known methodology 
+that meets all these conditions.  It is one of the most studied IT Methodologies 
 ever (Therefor AI knows it well). 
 
 It is called: 
 #### The WaterFall Technique
 
-What? Are you Crazy? That old stuff we threw away in the 60's?  
-Yep, that is the one! 
+You: ***What? Are you Crazy? That old stuff we threw away in the 60's?***  
+Me: **Yep, that is the one!** 
 
 ## The Waterfall Technique
 

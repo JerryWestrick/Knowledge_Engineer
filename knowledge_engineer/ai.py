@@ -455,8 +455,8 @@ class AI:
 
                 repeat = await self.chat(self.messages, step, process_name)
 
-        self.e_stats['sp_cost'] = pricing['input'] * (self.e_stats['prompt_tokens'] / 1000.0)
-        self.e_stats['sc_cost'] = pricing['output'] * (self.e_stats['completion_tokens'] / 1000.0)
+        self.e_stats['sp_cost'] = pricing['input'] * (self.e_stats['prompt_tokens'] )
+        self.e_stats['sc_cost'] = pricing['output'] * (self.e_stats['completion_tokens'] )
         self.e_stats['s_total'] = self.e_stats['sp_cost'] + self.e_stats['sc_cost']
         self.log.stop_step(step)
 

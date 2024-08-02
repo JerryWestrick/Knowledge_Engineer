@@ -13,25 +13,31 @@ I will avoid discussions about the conversations themselves (Prompt Engineering)
 And try to keep this document a ***HOW TO CREATE A PROMPT*** using the KEPF language.
 
 
-## The grammar of the KEPF Language
+# The grammar of the KEPF Language
 The KEPF language is a Domain Specific Language (DSL) that is used to create the prompts for the LLMs.  
+(i.e. A mini language for a specific purpose)
 The language is designed to be simple and easy to use.
 
 ### General Syntax
-The KEPF Language is line based.  i.e. Each line is a statement.   
+The KEPF Language is line based.  i.e. Each line is processed separately.   
 
-Prompts to LLMs consist of messages.  
-KEPF has a concept of the 'current message' which is being built.  
-Text is added to the 'current message' until a new message is started or the Iteration with the LLM is started.
+Its purpose is to build Prompts for LLMs.
+A prompt for a LLM consists of messages.  
+
+KEPF has a concept of a 'current message' that is being built.  The language has command to define the message being built.  
+Text is added to the 'current message' until a new message is started or the Iteration with the LLM is started.  
+This will become clear later, but knowing what is going to happen will give you an "AHA, I got it moment".
 
 In KEPF there are 2 types of statements:
-1. ***Key Word Statements***: These are lines that: 
+### Key Word Statements
+These are lines that: 
    - have a period ('.') in column one 
    - immediately followed by a keyword
-   - followed one or more whitespace
+   - followed by one or more whitespace
    - and optionally may have text between the whitespace and the end of line.
 
 ```   
+KEYWORD STATEMENT:
     +-- period
     |   +-- keyword
     |   |   +-- whitespace
@@ -40,15 +46,13 @@ In KEPF there are 2 types of statements:
     |   |   |     |
     v   v   v     v
     .include Planning/Gen_Code_Prompt.md 
-``` 
+```
+    NOTE I have had several collisions with files that have a "." (dot) in column one of a line.  
+         Maybe a different syntax should be chosen.
 
-    **Note:** 
-    
-    I have had several collisions with files that have a "." (dot) in column one of a line.  
-    Maybe a different syntax should be chosen.
+### Prompt Text
 
-2. ***Prompt Text***: These are lines that do not follow the above syntax.  
-    The text is added to the 'current message'.  
+These are lines that do not follow the above syntax.  They contain the text is added to the 'current message'.  
 
 ### The following Key Word Statements are implemented:
 | Key Word   | Description                                                            |
@@ -67,7 +71,12 @@ In KEPF there are 2 types of statements:
 ## .llm 
 The llm statement is used to identify the LLM to which this Step will converse with. 
 #### Example
+
     .llm "llm_name": "OpenAI", "model": "gpt-3.5-turbo-0125", "max_tokens": 50000
+
+since the values specified are the defaults, the above is equivalent to: 
+
+    .llm "model": "gpt-3.5-turbo-0125"
 
 The statement tells Knowledge Engineer that it should communicate with ***OpenAI ChatGPT*** and that when instantiating the communications protocol, the following parameters should be used:
 - **"model"**: "gpt-3.5-turbo-0125", 
@@ -75,16 +84,16 @@ The statement tells Knowledge Engineer that it should communicate with ***OpenAI
 
 
 ## .clear 
-The clear statement is used to delete working files from previous runs of the process.
+The clear statement is used to delete working files from previous runs of the process.  I suggest you only delete generated files. 
 #### Example
     .clear "Code/*", "Planning/*", "Logs/*.log"
 This statement tells Knowledge Engineer to delete all files in the Code, Planning, directories along with all log files in the Log Directory.
 
 
 ## .system 
-The system statement is used to create a **system message** to be sent to the LLM and make it "Current Message". 
+The system statement is used to start creating the **system message** i.e. making it "Current Message". 
 
-Further prompt lines are added to the "system message" until: 
+Further text lines are added to the "system message" until: 
 - a user message is started with a **.user** key word statement or 
 - the Iteration is started with a **.exec** key word statement.
 
@@ -98,14 +107,13 @@ Further prompt lines are added to the "system message" until:
     Your answers will be in MarkDown
     .user
 
-The statement above tells Knowledge Engineer to create a system message and insert the following lines into that message.
+The statements above tell Knowledge Engineer to create a system message and insert 6 lines into that message.
 
 
 ## .user 
-The user statement is used to create a **_user message_** to be sent to the LLM and make it the "Current Message.
+The user statement is used to start creating a **_user message_** and make it the "Current Message.
 
-Further prompt lines are added to the "user message" until:
-- the Iteration is started with a **.exec** key word statement.
+Further text lines are added to the "user message".  
 
 #### Example
 
@@ -119,14 +127,13 @@ Further prompt lines are added to the "user message" until:
     Write the prompt to 'Planning/Gen_Code_Prompt.md' using function 'write_file'.
     .exec
 
-The ***.user*** statement above tells Knowledge Engineer to create a user message. Sub Sequent Prompt lines are added to the user message.
+The ***.user*** statement above tells Knowledge Engineer to create a user message. It then adds 7 text lines the the user message.
 
 ## .assistant 
-The assistant statement is used to create a **_assistant message_** It is sent to the LLM as example of how you want the LLm to respond.
+The assistant statement is used just like the .system and .user statements.  But it creates an **_assistant message_**. 
 
-Further prompt lines are added to the "assistant message" until:
-- a '.user', '.function' message is encountered
-- the Iteration is started with a **.exec** key word statement.
+Using the assistant message "fakes" previous AI answers in the conversations.  This technic is used in Prompt Engineering 
+to give the LLM an example response in the way you want it.  
 
 #### Example
 
@@ -140,7 +147,7 @@ Further prompt lines are added to the "assistant message" until:
     <item>Three<definition>Three is at the end.</definition></item>
     </definition list>
     .user 
-    Make a definition list of all the topics covered in the esay
+    Make a definition list of all the topics covered in the essay
     .exec
 
 The ***.assistant*** statement above "pretends" to be a msg the LLm answered previously, 
@@ -153,7 +160,7 @@ the LLm to respond, i.e. that it call a function.
 The ***.function*** statement has not proven to be useful, and therefor is deprecated. 
 
 ## .include 
-The include statement is used to copy the contents of a file, inserting it into the current message. 
+The include statement is used to copy the contents of a file, inserting it as text lines into the current message. 
 
 #### Example
     .user
@@ -166,7 +173,7 @@ The include statement is used to copy the contents of a file, inserting it into 
 The ***.include*** statement above tells Knowledge Engineer to insert the contents of the file 'Planning/Gen_Code_Prompt.md' into the current Message.  The .exec terminates the "Current Message" (a User Message) and starts an Iteration with the LLM.
 
 
-## .cmd 
+## .cmd (Not functional yet)
 The cmd statement is used to execute a command on the local system:  
 - The command is executed in the current directory (where the Knowledge Engineer is running). 
 - The command is executed in a subshell, 
@@ -250,7 +257,7 @@ The second Iteration with the LLM is started, with the final '.exec' statement t
 
 
 
-## EBNF like grammar
+# EBNF like grammar
     ?start: "." statement 
         
     ?statement: role_statement
