@@ -54,42 +54,41 @@ version = "0.5.0"
 rm -r dist
 python -m build
 ```
-
-    To Install
+To Install build tool:
 ```
 python3 -m pip install --upgrade build
 ```
 
-5. Upload the distribution files to the test.pypi repository.
+4. Upload the distribution files to the test.pypi repository.
     
 ```
 twine upload --repository testpypi dist/*
 ```
 
-6. Test the test release.
+5. Test the test release.
 
 ```
 pip install --index-url https://test.pypi.org/simple/ --no-deps knowledge-engineer
 ```
     
-7. uninstall the test release.\
+6. uninstall the test release.\
 
 ```
 pip uninstall knowledge-engineer
 ```
     
-8. Upload the distribution files to the pypi repository.
+7. Upload the distribution files to the pypi repository.
 
 ```
 twine upload  --repository pypi dist/*
 ```
     
-9. Install the release.
+8. Install the release.
 
 ```
 pip install knowledge-engineer
 ```
     
-10. Test the release.
+9. Test the release.
 
     Good luck
