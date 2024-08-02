@@ -1,16 +1,17 @@
 # Devlopement
 
 The local installation is used for development and testing.  It is also used to run the example projects.  The local installation is done using the following steps:
-
-    pip install --editable .
+```shell
+pip install --editable .
+```
 
 The --editable option is used to install the package in "editable" mode.  This means that the package is installed in such a way that changes to the source code are immediately available to the installed package.  This is useful for development and testing.  Unfortunately, the --editable option is not 100% accurate, in that it will expose some things that are not exposed in the release.
 
 You can uninstall the package using the following command:
 
-    ```
-    pip uninstall knowledge-engineer
-    ```
+```
+pip uninstall knowledge-engineer
+```
 
 
 # Release A Version
@@ -29,9 +30,9 @@ In order to release a version of the knowledge-engineer package, you need to do 
 
 ### 1. Uninstall the Knowledge Engineer package from your local environment
 
-    ```
-    pip uninstall knowledge-engineer
-    ```
+```
+pip uninstall knowledge-engineer
+```
     
 ### 2. Increment the version no in the pyproject.toml file.
     
@@ -41,53 +42,53 @@ In order to release a version of the knowledge-engineer package, you need to do 
 
     The version number is in the pyproject.toml file.  Increment the version.  The version number is in the following format:
 
-    ```
+```
 [project]
 name = "knowledge_engineer"
 version = "0.5.0"
-    ```
+```
 
 3. Build the distribution files.     
 
-    ```
-    rm -r dist
-    python -m build
-    ```
+```
+rm -r dist
+python -m build
+```
 
     To Install
-    ```
-    python3 -m pip install --upgrade build
-    ```
+```
+python3 -m pip install --upgrade build
+```
 
 5. Upload the distribution files to the test.pypi repository.
     
-   ```
-   twine upload --repository testpypi dist/*
-   ```
+```
+twine upload --repository testpypi dist/*
+```
 
 6. Test the test release.
 
-    ```
-    pip install --index-url https://test.pypi.org/simple/ --no-deps knowledge-engineer
-    ```
+```
+pip install --index-url https://test.pypi.org/simple/ --no-deps knowledge-engineer
+```
     
 7. uninstall the test release.\
 
-    ```
-    pip uninstall knowledge-engineer
-    ```
+```
+pip uninstall knowledge-engineer
+```
     
 8. Upload the distribution files to the pypi repository.
 
-    ```
-    twine upload  --repository pypi dist/*
-    ```
+```
+twine upload  --repository pypi dist/*
+```
     
 9. Install the release.
 
-    ```
-    pip install knowledge-engineer
-    ```
+```
+pip install knowledge-engineer
+```
     
 10. Test the release.
 
