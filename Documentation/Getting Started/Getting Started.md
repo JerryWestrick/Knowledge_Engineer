@@ -2,7 +2,7 @@
 
 ## Installation ## Linux / Mac
 ```shell
-mdkir ke
+mkdir ke
 cd ke
 python3 -m venv .venv
 source .venv/bin/activate
@@ -46,7 +46,7 @@ There are many other keys available to be entered.  but the demo is setup to wor
 
 ### Execute Example Project
 ```shell
-knowledge_engineer --execute
+knowledge_engineer --exec
 ```
 
 
@@ -151,7 +151,7 @@ knowledge_engineer --models
 You can list the steps in the project:
 These are the files in the snake/Steps directory:
 ```shell
-knowledge_engineer --list
+knowledge_engineer --steps
 ```
 
 ![Snake_Steps.png](Snake_Steps.png)
@@ -162,13 +162,13 @@ knowledge_engineer --list
 ![1-MakeGameprompt.kepf.png](1-MakeGameprompt.kepf.png)
 
 The .kepf file is executed line by line as follows:
-- The ".llm" line defines the LLM model to call.  It must be listed in --models list above
-- The ".clear" line deletes everything the listed directories.
-- The ".system" sets the current message being built to the System Message (or how the model should behave)
-- the lines between .system and .user lines are the system message.
-- The ".user" line terminates the system message, and starts a "user" message.
-- The lines between .user and .exec are the user message.
-- The ".exec" line Tells knowledge-engineer to start an interaction with the model using the message built.
+1. The ".llm" line defines the LLM model to call.  It must be listed in --models list above 
+2. The ".clear" line deletes everything the listed directories. 
+3. The ".system" sets the current message being built to the System Message (or how the model should behave)
+4. The lines between .system and .user lines are the system message. 
+5. The ".user" line terminates the system message, and starts a "user" message. 
+6. The lines between .user and .exec are the user message. 
+7. The ".exec" line Tells knowledge-engineer to start an interaction with the model using the message built.
 
 The are several concepts here:
 1. The file (Step) is a conversation with a model, with a shared context. Other steps are different conversations with other context and may even use different models.
@@ -179,16 +179,33 @@ When the step is executed, as seen below, the file Planning/Game Prompt.md is wr
 
 ![Exec_Step_1.png](Exec_Step_1.png)
 
-Lets look at the lines:  
-- "ke::Found" shows the Steps to be executed.  In this case just one.
-- "ke::Clearing list the files being deleted."
-- "Step::  Step: snake: " lists the step being executed.
-- "Step::| Model: " lists the LLm version that will be used...
-- "AI::| |      system" lists the constructed system message
-- "AI::| |        user" lists the constructed user message
-- "AI::| |   writefile" AI give the command to write to a file. 
-- "AI::| |      return" knowledge_engineer tells AI it did it. 
-- "AI::| |   AI (stop)" AI says it done. 
+Lets look at the lines:
+
+| line                                                                | meaning                        |
+|---------------------------------------------------------------------|--------------------------------|
+| ke::Begin Execution "snake steps 1*"                                | command being executed         |
+| ke::Found "['Steps/1- Make Game Promot.kepf']"                      | steps to be executed           |
+| ke::Execute snake(1): "1 - Make Game Prompt.kepf"                   | step being loaded              |
+| ke::Exectuting "1 - Make Game Prompt.kepf"                          | Begin of execution             |
+| ke::Clearing ['Code/*', 'Planning/*', 'Logs/*']                     | Old files being deleted        |
+| ke::Logging to: Logs/snake-1- Make Game Prompt.log                  | opened the log file.           |
+| Step::┌─ Step: snake:"Steps/1- Make Game Prompt"                    | Begining of Step               |
+| Step::│ Model: "gpt-4o-mini", Temperature: 0, Max Tokens: 128,000   | LLM with parameters            |
+| _ AI::│ ┌───────────────────────────────────                        | Begin first Conversation       |
+| _ AI::│ │         system You are a Knowledge Engineer creating...   | the system message             |
+| _ AI::│ │           user Write a prompt for Chat GPT that will...   | the user message               |
+| _ AI::│ │      writefile (Planning/Game Prompt.md, ...)...          | AI calls writefile             |
+| _ AI::│ │        call_id 0                                          | AI id for function call        |
+| _ AI::│ │         return writefile(0):: Done.                       | ke notifies execution complete |
+| _ AI::│ │       AI (stop) [The prompt has been written to the ...   | AI task is complete            |
+| _ AI::│ └───────────────────────────────────                        | End first Conversation         |
+| Step::│ Writing log "Logs/1- Make Game Prompt log.md"               | Closing up Logfile             |
+| Step::│ Elapsed: 0m 3.69s Token Usage: Total: 582                   | Stats for this Step            |
+| .     │ Costs:: Total: $0.00 (Prompt: $0.0001, Completion: $0.0000) | Stats for this Step            |
+| .     ╰───────────────────────────────────────                      | End of Step                    |
+| ke::converting Logs/snake-1- Make Game Prompt.log to                | Converting log to Html         |
+| ke::Elapsed: 0m 3.72s Token Usage: Total: 582.0 (Prom...            | Job Stats                      |
+| .   Costs:: Total: $0.00 (Prompt: $0.0001, Completion: $0.0000)     | Job Stats                      |
 
 At step termination the logs are written, and the run statistics are printed.
 
@@ -211,16 +228,21 @@ We could have told the LLM to read it using the **readfile** function instead of
 
 Here you will note that the file **Code/snake_game.py** was written...
 
-This can be executed with the command: "python Code/snake_game.py".
+This can be executed with the command: 
+```shell
+python Code/snake_game.py
+```
+![NoModule.png](NoModule.png)
+Uppps: no module pygame.....
 
-But 3 out of 4 times it will not work, as gpt 3.5 turbo is not up to the task.
+```shell
+pip install pygame
+```
 
-So lets use something else:
-## Modifying a Step
-Edit "2- Make Snake Game,kepf"
-change "gpt-3.5-turbo-0125" for "gpt-4o"
-then run again using the command: ***"knowledge-engineer --step=2*"***
+# And Now it Works
+```shell
+python Code/snake_game.py
+```
 
-Now Python Code/snake_game.py will run...
-
+Phew that was a lot of documenting!!!!
 

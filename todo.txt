@@ -5,11 +5,11 @@ Todo: In order to force the LLM into a response that we can better understand/wo
 
 
 Todo: add a .wget local command to access web-pages
-Done: a www_get(url='') function to have AI download web pages from internet.
+Todo: a www_get(url='') function to have AI download web pages from internet.
+      In both of these the html download is with javascript off, this is nearly worthless...
+      I have heard of a new special library that is built to download webpages llms  is has fire in its name)
 
 Todo: Make a functions and routines executable from both sides.  (Allowing for local side exec and ask_user ect)
-
-Done: The 'Continue?' prompt with gpt 3.5 turbo does not seam to work...
 
 Todo: Add routine to update OpenAI_API_Costs.py
 
@@ -18,17 +18,10 @@ Todo: The file create_new_process.py, creates the example process structure.
       A command "Make Default" is required that saves the structure and contents of a proces,
       To be used in future '-create' command.  This will simplify development.
 
-Done: add syntax for .llm, .clear, .include, and .cmd lines
-
 Todo: need a repository for example processes
 
 Todo: Write macro values to a file, so that they will be reloaded.
-
 Todo: .macros line to insert new values into macros.
-
-Done: add [05:54:56.354]      Step::╭─ Step: rs:"Prompts/2- Create Relationship Names"
-          [05:54:56.355]      Step::│ Model: "gpt-4-1106-preview", Temperature: 0, Max Tokens: 50,000, Response Format: "json_object"
-      To the log files.
 
 Todo: Have problem with macro replacement.
       Macros are substituted during building of message list.
@@ -40,21 +33,3 @@ Todo: Have problem with macro replacement.
 
 Todo: Documentation for macros
 
-Todo: Error in --step=99*  if there is no matching file...  Need to add a check for this.
-
-Done: Need some sort of "Conversation" mode.  Where the user can see the answers, and decide to say "Continue".
-      function LLM can call called ask_user()
-
-Done: update the log file as the process runs.
-
-Done: The new terminal output is awesome.  I have changed the -log Logs/Run-01-Database.log to output color and formatting.
-      This color and formatting is not readable, the program 'aha -f Logs/Run-01-Database.log > Logs/Run-01-Database.html'
-      creates a wonderfully looking html output of the terminal.  The conversion should be done automatically!
-
-Done: Step=Admin* only executes one step.   Exec=Admin* executes all matching steps...
-
-Todo: Update documentation
-
-Done: Logging to html support for Mac and Windows.
-
-Todo: if Log Directory does not exist the program abends with no message...

@@ -17,7 +17,7 @@ class Step:
                  macros: dict[str, str] = None,
                  # AI params
                  llm_name: str = '',
-                 model: str = 'gpt-3.5-turbo-1106',
+                 model: str = 'gpt-4o-mini',
                  temperature: int = 0,
                  max_tokens: int = 4000,
                  response_format=None

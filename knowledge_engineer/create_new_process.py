@@ -5,7 +5,7 @@ from knowledge_engineer.logger import Logger
 New_Process_Steps: dict[str, str] = {
     # =======================================
     '1- Make Game Prompt.kepf':
-        """.llm "model": "gpt-3.5-turbo-0125"
+        """.llm "model": "gpt-4o-mini"
 .clear "Code/*", "Planning/*", "Logs/*"
 .system
 You are a Knowledge Engineer creating a Chat GPT prompt.
@@ -22,7 +22,7 @@ write it to the file Planning/Game Prompt.md
 
     # ==========================================
     '2- Make Snake Game.kepf':
-        """.llm "model": "gpt-3.5-turbo-0125"
+        """.llm "model": "gpt-4o-mini"
 .system
 You are an IT Engineer, programming a Python 3 Application
 Do not explain yourself.

@@ -98,14 +98,16 @@ def main():
     process_management_group = parser.add_argument_group('Process Management')
     process_management_group.add_argument("-c", "--create", metavar="dir", type=str,
                                           help="Create a new process in the specified directory")
-    process_management_group.add_argument("-l", "--list", action='store_true',
-                                          help="List all steps in the current process")
+    # process_management_group.add_argument("-l", "--list", action='store_true',
+    #                                       help="List all steps in the current process")
     execution_control_group = parser.add_argument_group('Execution Control')
-    execution_control_group.add_argument("-e", "--exec", metavar="exec", type=str,
-                                         help="Execute all steps in the current process matched by glob")
-
-    execution_control_group.add_argument("-s", "--step", metavar="name", type=str,
-                                         help="Execute the specified step in the process")
+    # execution_control_group.add_argument("-e", "--exec", metavar="exec", type=str,
+    #                                      help="Execute one or more steps in the current process matched by glob")
+    execution_control_group.add_argument("-e", "--exec", metavar="exec", type=str, nargs='?', const="*",
+                                         help="Execute one or more steps in the current process matched by glob",
+                                         default=None)
+    execution_control_group.add_argument("-s", "--steps", action='store_true',
+                                         help="List all steps in the current process")
     # execution_control_group.add_argument("--log", metavar="FILE", type=str, help="Log output to the specified file")
 
     information_group = parser.add_argument_group('Information')
@@ -124,6 +126,8 @@ def main():
 
     # Parse the arguments (This line is necessary for the actual argument parsing, but not for generating the help text)
     # args = parser.parse_args()
+
+    # Check for ke_process_config.env file
 
     # Parse the arguments
     args: argparse.Namespace = parser.parse_args()
@@ -178,6 +182,19 @@ def main():
     if args.models or args.functions or args.version or args.macros:
         return
 
+    if args.steps:
+        list_all_processes()
+        return
+
+    default_dir = os.getcwd()
+    dotenv_file = f'{default_dir}/ke_process_config.env'
+    found = os.path.exists(dotenv_file)
+    if not found:
+        print(f"[No ke_process_config.env file]\n The Directory {default_dir} is not a KnowledgeEngineer Process Directory")
+        exit(2)
+
+
+
     asyncio.run(run_ke(args))
 
 
@@ -217,6 +234,14 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
         log.error(err_msg, err)
         log.error(f"{json_str}", None)
         log.error(f"{err.msg}", None)
+        raise err
+
+    model = step_parameters['model']
+    if model not in AI_API_Costs:
+        err_msg = f"Unknown Model {model}..."
+        err = ValueError()
+        err.add_note(err_msg)
+        log.error(err_msg)
         raise err
 
     llm = AI_API_Costs[step_parameters['model']]
@@ -260,17 +285,12 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
 
     # Start Logging
     name = prompt_name[len(prompt_dir) + 1:-5]
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
     log_file_name = f"{log_dir}/{proc_name}-{name}.log"
     log.set_log_file(log_file_name)
     log.info(f"Logging to: {log_file_name}")
 
     await step.run(proc_name, messages=messages)
-
-    # command = f"ansi2html -f {log_file_name} > {log_file_name[:-4]}.html"
-    #
-    # log.info(f"converting log to html...")
-    # subprocess.run(command, shell=True)
-    # log.info(f"done")
 
     convert_log_to_html(log_file_name, f"{log_file_name[:-4]}.html")
     return step
@@ -310,36 +330,20 @@ def convert_log_to_html(input_file, output_file):
     """
 
     # Write the HTML content to the output file
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(full_html)
+    # with open(output_file, 'w', encoding='utf-8') as f:
+    #     f.write(full_html)
+    memory[output_file] = full_html
 
 
 async def run_ke(args: argparse.Namespace):
     # Does Directory have configuration file?
     default_dir = os.getcwd()
     dotenv_file = f'{default_dir}/ke_process_config.env'
-    if not os.path.exists(dotenv_file):
-        log.error(f"[No ke_process_config.env file]\n"
-                  f"The Directory {default_dir} is not a KnowledgeEngineer Process Directory", None)
-        exit(2)
 
     proc_name = Path(default_dir).stem
     load_dotenv(dotenv_file)
 
     try:
-        if args.list:
-            list_all_processes()
-            return
-
-        if args.step:
-            try:
-                step: Step = await execute_step(proc_name, args.step)
-            except Exception as err:
-                err_msg = f"Execution of --step={args.step} failed: {err}"
-                log.error(err_msg, err)
-                raise err
-            return
-
         if args.exec:
             await execute_process(proc_name, args.exec)
             return
