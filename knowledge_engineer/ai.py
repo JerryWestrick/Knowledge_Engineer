@@ -6,11 +6,8 @@ import subprocess
 import sys
 from abc import abstractmethod
 
-import aiohttp
 import anthropic
 import httpx
-# from aioconsole import ainput
-from bs4 import BeautifulSoup
 from groq import AsyncGroq
 
 from anthropic import AsyncAnthropic

@@ -7,7 +7,7 @@ knowledge_engineer = ["*.md"]
 
 [project]
 name = "knowledge_engineer"
-version = "0.6.20"
+version = "0.6.21"
 authors = [
     { name = "Jerry Westrick", email = "jerry@westrick.com" },
 ]
@@ -20,21 +20,21 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "rich",
-    "openai",
-    "mistralai",
-    "python-dotenv",
-    "aiohttp",
-    "anthropic",
-    "groq",
-    "lark",
-    "databases",
     "aioconsole",
-    "knowledge_engineer",
-    "prompt-toolkit",
+    "aiohttp",
     "ansi2html",
-    "bs4",
+    "anthropic",
     "asyncio",
+    "databases",
+    "groq",
+    "knowledge_engineer",
+    "lark",
+    "mistralai",
+    "openai",
+    "prompt-toolkit",
+    "python-dotenv",
+    "rich",
+
 ]
 
 [project.scripts]

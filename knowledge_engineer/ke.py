@@ -4,19 +4,15 @@ import glob
 import json
 import shutil
 import time
-import subprocess
 from json import JSONDecodeError
 from pathlib import Path
 
-import sys
 import traceback
 
 from ansi2html import Ansi2HTMLConverter
 from rich.traceback import install
 
-
 from dotenv import load_dotenv
-from rich.markdown import Markdown
 
 from knowledge_engineer.AI_API_Costs import AI_API_Costs
 from knowledge_engineer.ai import AI, AIException
