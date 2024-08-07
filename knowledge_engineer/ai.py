@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import platform
@@ -8,7 +9,7 @@ from abc import abstractmethod
 import aiohttp
 import anthropic
 import httpx
-from aioconsole import ainput
+# from aioconsole import ainput
 from bs4 import BeautifulSoup
 from groq import AsyncGroq
 
@@ -131,17 +132,27 @@ class AI:
         return await succeed({'name': 'read_file', 'content': file_contents})
 
     async def get_webpage_content(self, url: str) -> str:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                content = await response.text()
-        soup = BeautifulSoup(content, 'html.parser')
-        for script in soup(["script", "style"]):
-            script.decompose()
-        text = soup.get_text()
-        lines = (line.strip() for line in text.splitlines())
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        text = '\n'.join(chunk for chunk in chunks if chunk)
-        return text
+        # Command to fetch the content and convert it to text
+        command = f"wget2 --content-on-error -O - {url} | html2text"
+
+        # Create a subprocess
+        process = await asyncio.create_subprocess_shell(
+            command,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+
+        # Wait for the subprocess to finish and get output
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            # If there was an error, raise an exception with the error message
+            raise Exception(f"Error fetching URL: {stderr.decode()}")
+
+        # Return the output as a string
+        return stdout.decode()
+
+
 
     async def www_get(self, url: str, process_name: str):
 
@@ -196,12 +207,30 @@ class AI:
 
         return txt
 
-    async def execute_cmd_prompt(self, command: str) -> dict[str, str]:
+    async def execute_cmd_prompt(self, command: str, process_name: str) -> dict[str, str]:
         """Execute a command that was defined in a prompt file (.kepf)"""
 
-        answer = self.exec_subprocess(command)
-        msg = {'name': 'cmd', 'role': 'user', 'content': f'result of "{command}" is {answer}'}
-        return await succeed(msg)
+        function_name, args = command.split('(', maxsplit=1)
+        args = args[:-1]
+        args_list = args.split(",")
+        function_args = {}
+        for arg in args_list:
+            name, value = arg.split("=", maxsplit=1)
+            function_args[name] = value
+
+        self.log.cmd_tool_call(0, function_name, function_args)  # Display with last message
+        try:
+            new_msg = await self.available_functions[function_name](
+                self,
+                **function_args,
+                process_name=process_name
+            )
+        except Exception as err:
+            err_msg = make_error_msg(err)
+            self.log.error(err_msg, err)
+            raise err
+
+        return {'role': 'user', 'content': f"```result of {function_name}({function_args})\n{new_msg['content']}\n```"}
 
     async def execute_cmd_ai(self, command: str, process_name: str) -> dict[str, str]:
         """Execute a local command by LLM request"""
@@ -437,9 +466,9 @@ class AI:
             msg = user_messages.pop(0)
             while msg['role'] != 'exec':
                 if msg['role'] == 'cmd':
-                    answer = await self.execute_cmd_prompt(msg['content'])
-                    self.messages.append(self.make_msg(answer))
-                    self.log.umsg(step, answer)
+                    answer = await self.execute_cmd_prompt(msg['content'], process_name)
+                    self.messages.append(answer)
+                    # self.log.umsg(step, answer)
                 else:
                     self.messages.append(self.make_msg(msg))
                     self.log.umsg(step, msg)
@@ -452,6 +481,16 @@ class AI:
                 repeat = False
 
                 step.update_gui()
+
+                # Join multiple role=user messages
+                msgs = []
+                for msg in self.messages:
+                    # user is never first msg so edge case msg(role) and msgs empty cannot happen
+                    if msg['role'] == 'user' and msgs[-1]['role'] == 'user':
+                        msgs[-1]['content'] = msgs[-1]['content'] + "\n" + msg['content']
+                    else:
+                        msgs.append(msg)
+                self.messages = msgs
 
                 repeat = await self.chat(self.messages, step, process_name)
 

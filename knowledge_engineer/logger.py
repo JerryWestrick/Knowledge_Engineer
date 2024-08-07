@@ -83,6 +83,24 @@ class Logger:
         self.print(f"{self.ts()}{self._format_head()}{fn} {action_result}")
         self.print(f"{self.ts()}{self._format_head()} [deep_sky_blue1]{'call_id':>13}[/] [green]{id}[/]")
 
+    def cmd_tool_call(self, id, func_name: str, arg_str: object):
+        args = json.loads(arg_str) if isinstance(arg_str, str) else arg_str
+        fn = f"[slate_blue1]cmd {func_name:>10}[/]"
+
+        func_actions = {
+            'read_file': lambda: f"({args['name']}):",
+            'write_file': lambda: f"({args['name']}, ...)[green]{[arg_str]}[/]",
+            'replace': lambda: f"({args['name']}, ...)[green]{[arg_str]}[/]",
+            'patch': lambda: f"({args['patch_commands'][:50]}...)",
+            'exec': lambda: f"({args['command'][:50]}...)",
+            'query_db': lambda: f"({args['sql'][:50]}...)",
+            'ask_user': lambda: f"({args['question'][:50]}...)"
+        }
+
+        action_result = func_actions.get(func_name, lambda: f"({args.get('filename', '')}, ...)[green]{[arg_str]}[/]")()
+        self.print(f"{self.ts()}{self._format_head()}{fn} {action_result}")
+
+
     def ret_msg(self, id, result: Dict[str, str]):
         txt = result['content'].replace('\n', '\\n')
         self.print(f"{self.ts()}{self._format_head()}[medium_orchid]{'return':>14}[/] [green]{result['name']}({id}):: {txt}[/]")

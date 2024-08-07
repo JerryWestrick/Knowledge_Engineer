@@ -55,17 +55,18 @@ KEYWORD STATEMENT:
 These are lines that do not follow the above syntax.  They contain the text is added to the 'current message'.  
 
 ### The following Key Word Statements are implemented:
-| Key Word   | Description                                                            |
-|------------|------------------------------------------------------------------------|
-| .llm       | Define the LLM to be used                                              |
-| .clear     | Clear working directories                                              |
-| .system    | Create a system message and make it "current message"                  |
-| .user      | Create a user message and make it "current message"                    |
-| .assistant | Imitate a LLM response as example of how you want LLM to respond       |
-| .function  | Imitate a LLM function call as example of how you want LLM to respond  |
-| .include   | Include a file in the "current message"                                |
-| .cmd       | Execute a command on the local system                                  |
-| .exec      | Start an Iteration with the LLM                                        |
+| Key Word   | Description                                                           |
+|------------|-----------------------------------------------------------------------|
+| .llm       | Define the LLM to be used                                             |
+| .clear     | Clear working directories                                             |
+| .system    | Create a system message and make it "current message"                 |
+| .user      | Create a user message and make it "current message"                   |
+| .assistant | Imitate a LLM response as example of how you want LLM to respond      |
+| .include   | Include a file in the "current message"                               |
+| .cmd       | Execute a function locally from .kepf file                            |
+| .exec      | Start an Iteration with the LLM                                       |
+
+
 
 
 ## .llm 
@@ -98,16 +99,12 @@ Further text lines are added to the "system message" until:
 - the Iteration is started with a **.exec** key word statement.
 
 #### Example
-    .system
-    You are a Knowledge Engineer creating a GPT4 Turbo prompt.
-    The prompt will instruct GPT3.5 to create a Python 3 Application
-    Do not explain yourself.
-    Do not apologize.
-    Complete the tasks given in a way that is optimized for Chat GPTs easy comprehension while not leaving anything out.
-    Your answers will be in MarkDown
-    .user
 
-The statements above tell Knowledge Engineer to create a system message and insert 6 lines into that message.
+    .system
+    You are a working on administrative services.
+    evaluate provided documentation, and generate output as requested.
+
+The statements above tell Knowledge Engineer to create a system message and insert the lines into that message.
 
 
 ## .user 
@@ -118,16 +115,19 @@ Further text lines are added to the "user message".
 #### Example
 
     .user
-    read the description of the program: Requirements/ApplicationDescription.md
-    create a prompt that will instruct GPT 4 Turbo to:
-       - create a complete running program as described.
-       - contain initialize, process, and terminate phases
-       - list all the rules to be implemented
-       - implement all the requirements in the prompts
-    Write the prompt to 'Planning/Gen_Code_Prompt.md' using function 'write_file'.
+
+    with this webpage:
+    .cmd www_get(url=https://docs.anthropic.com/en/docs/about-claude/models)
+    .cmd www_get(url="https://mistral.ai/technology/#pricing")
+    .cmd www_get(url="https://openai.com/api/pricing/")
+    
+    Here is the old Pricing:
+    .cmd readfile(filename=Prices/AI_API_Costs.py)
+    
+    update the pricing and write it to Prices/AI_API_Costs.py
     .exec
 
-The ***.user*** statement above tells Knowledge Engineer to create a user message. It then adds 7 text lines the the user message.
+The ***.user*** statement above tells Knowledge Engineer to create a user message and start adding lines to it.
 
 ## .assistant 
 The assistant statement is used just like the .system and .user statements.  But it creates an **_assistant message_**. 
@@ -153,12 +153,6 @@ to give the LLM an example response in the way you want it.
 The ***.assistant*** statement above "pretends" to be a msg the LLm answered previously, 
 and thereby shows the LLM the format that you want returned.
 
-## .function (deprecated)
-The function statement is used to create a **_function message_** It is sent to the LLM as example of how you want 
-the LLm to respond, i.e. that it call a function.
-
-The ***.function*** statement has not proven to be useful, and therefor is deprecated. 
-
 ## .include 
 The include statement is used to copy the contents of a file, inserting it as text lines into the current message. 
 
@@ -173,24 +167,47 @@ The include statement is used to copy the contents of a file, inserting it as te
 The ***.include*** statement above tells Knowledge Engineer to insert the contents of the file 'Planning/Gen_Code_Prompt.md' into the current Message.  The .exec terminates the "Current Message" (a User Message) and starts an Iteration with the LLM.
 
 
-## .cmd (Not functional yet)
-The cmd statement is used to execute a command on the local system:  
-- The command is executed in the current directory (where the Knowledge Engineer is running). 
-- The command is executed in a subshell, 
-- stdout and stderr are captured and inserted as Prompt Text into the current message. 
-- Often the command generates a file which is either: 
-  - included via a **.include statement**.
-  - or read by the LLM using the **read_file function**.
+## .cmd function(parm1=xxx,parm2=yyy)
+The cmd statement is used to execute one of the functions on the local system:  
+The command is executed in the current directory (where the Knowledge Engineer is running).
+
+List the available functions:
+
+    knowledge-engineer --functions
+    ke:: Function                                      Description                                       
+    ke:: --------------------------------------------- ---------------------------------------------------------------------------
+    ke:: readfile(filename: string)                    "Read the contents of a named file"
+    ke:: www_get(url: string)                          "Read a webpage url and return the contents"
+    ke:: writefile(filename: string, content: string)  "Write the contents to a named file on the local file system"
+    ke:: exec(command: string)                         "Execute a command on the local Linux-6.8.0-39-generic-x86_64-with-glibc2.39 system"
+    ke:: query_db(sql: string)                         "Execute an SQL against psql (PostgreSQL) 14.11 (Ubuntu 14.11-0ubuntu0.22.04.1) database"
+    ke:: ask_user(question: string)                    "Get Clarification by Asking the user a question"
+ 
 
 #### Example
-    .cmd curl https://openai.com/pricing | lynx -dump -stdin > Planning/openai_pricing.txt
+    .user
 
-The .cmd statement tells Knowledge Engineer to:
-1. retrieve https://openai.com/pricing webpage, 
-2. convert it to text and 
-3. store it in the file:Planning/openai_pricing.txt.  
+    with this webpage:
+    .cmd www_get(url=https://docs.anthropic.com/en/docs/about-claude/models)
+    .cmd www_get(url="https://mistral.ai/technology/#pricing")
+    .cmd www_get(url="https://openai.com/api/pricing/")
+    
+    Here is the old Pricing:
+    .cmd readfile(filename=Prices/AI_API_Costs.py)
+    
+    update the pricing and write it to Prices/AI_API_Costs.py
+    .exec
 
-The output of the command is inserted into the current message.
+The first .cmd statement calls the www_get(...) function which:
+1. retrieves https://docs.anthropic.com/en/docs/about-claude/models webpage, 
+2. converts it to text and 
+3. inserts it in a new user message  
+
+The content of this message is formated as follows:
+
+        ```www_get(url=https://docs.anthropic.com/en/docs/about-claude/models)
+        <webpage text contents>
+        ```
 
 ## .exec 
 The exec statement tells Knowledge Engineer to initiate an Iteration with the LLM.  The LLM will be sent the system and user messages.  Knowledge Engineer and LLM will then respond to each other until the Iteration is complete.
@@ -207,54 +224,28 @@ The statement above tells Knowledge Engineer to close the "Current Message" and 
 
 # More complex example of a KEPF file:
 
-    .llm "model": "gpt-3.5-turbo-0125"
-    .clear "Planning/*"
+    .llm "model": "gpt-4o-mini"
+    .system
+    You are a working on administrative services.
+    evaluate provided documentation, and generate output as requested.
     .user
-    .cmd curl https://openai.com/pricing | lynx -dump -stdin > Planning/openai_pricing.txt
-    read the file 'Planning/openai_pricing.txt'
-    Describe the different offerings from OpenAI and write it to 'Code/OpenAI_API_Pricing.md'.
-    Make document pretty, by using colors and arranging the info in tables.
+    
+    with this webpage:
+    .cmd www_get(url=https://docs.anthropic.com/en/docs/about-claude/models)
+    .cmd www_get(url="https://mistral.ai/technology/#pricing")
+    .cmd www_get(url="https://openai.com/api/pricing/")
+    
+    Here is the old Pricing:
+    .cmd readfile(filename=Prices/AI_API_Costs.py)
+    
+    update the pricing and write it to Prices/AI_API_Costs.py
     .exec
-    read the file Code/OpenAI_API_Pricing.md and rewrite the file 'Code/OpenAI_API_Pricing.md' with the updated information.
-
 ## Description
-First off the .kepf file does not end with a .exec statement but one was implied it is added to the end of the file.
-
-    .llm "model": "gpt-3.5-turbo-0125"
-use OpenAI's Chat GPT 3.5 Turbo
-
-    .clear "Planning/*"
-delete all files in the Planning directory.
-
-    .user 
-Start a user message
-
-    .cmd curl https://openai.com/pricing | lynx -dump -stdin > Planning/openai_pricing.txt
-
-- Download the OpenAI pricing page, 
-- convert it to text and 
-- store it in the file 'Planning/openai_pricing.txt'
-
-```
-read the file 'Planning/openai_pricing.txt'
-Describe the different offerings from OpenAI and write it to 'Code/OpenAI_API_Pricing.md'.
-Make document pretty, by using colors and arranging the info in tables.
-```
-  
-Add the "Prompt Text" lines to the user message.
-
-    .exec
-Start Iteration with the LLM. (Do It!)
-
-    read the file Code/OpenAI_API_Pricing.md and rewrite the file 'Code/OpenAI_API_Pricing.md' with the updated information.
-
-Add the Prompt Text to the current message.  (Since no .user or .system was defined it defaults to a new user message).
-
-    .exec <-- this was added by the system.
-The second Iteration with the LLM is started, with the final '.exec' statement that was added at the beginning.
-
-
-
+This Prompt File tells Knowledge engineer to: 
+1. go get 3 webpages
+2. To read the old prices from Prices/AI_API_Costs.py file
+3. then update old prices with contents of webpages 
+4. and finally write new prices to Prices/AI_API_Costs.py file 
 
 
 # EBNF like grammar

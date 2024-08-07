@@ -1,17 +1,10 @@
-Todo: In order to force the LLM into a response that we can better understand/work with,
-      add the response_format = { "type": "json_object" } to the call (both openai and mistral)
-      and add "respond with a json like { cmd=..., description=...}" to the system call...
-      As test with this format worked very well.
-
-
-Todo: add a .wget local command to access web-pages
-Todo: a www_get(url='') function to have AI download web pages from internet.
+reject: add a .wget local command to access web-pages
+done: a www_get(url='') function to have AI download web pages from internet.
       In both of these the html download is with javascript off, this is nearly worthless...
       I have heard of a new special library that is built to download webpages llms  is has fire in its name)
-
-Todo: Make a functions and routines executable from both sides.  (Allowing for local side exec and ask_user ect)
-
+Done: Make a functions and routines executable from both sides.  (Allowing for local side exec and ask_user ect)
 Todo: Add routine to update OpenAI_API_Costs.py
+
 
 Todo: The file create_new_process.py, creates the example process structure.
       But the code in the prompts needs to be updated by hand.
