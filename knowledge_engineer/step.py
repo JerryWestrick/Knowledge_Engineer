@@ -101,12 +101,7 @@ class Step:
         self.ai.e_stats['s_total'] = 0.0
         self.ai.e_stats['elapsed_time'] = 0.0
 
-        top_left = '╭─ '
-        # top_right = '─╮'
-        bottom_left = '╰──'
-        # bottom_right = '──╯'
-
-        txt = f'{top_left}Step: {self.pname}:"{self.name}"'
+        txt = f'{self.log.top_left}{self.log.horizontal_mid} Step: {self.pname}:"{self.name}"'
         self.log.info(f"{txt}")
         txt = f'{self.log.vertical_mid} Model: "{self.ai.model}", Temperature: {self.ai.temperature}, Max Tokens: {int(self.ai.max_tokens):,} Company: {self.ai.llm_name}'
         if self.ai.response_format:
@@ -158,4 +153,4 @@ class Step:
                       f"{self.log.vertical_mid} Costs:: Total: [green]${self.ai.e_stats['s_total']:.2f}[/] "
                       f"(Prompt: ${self.ai.e_stats['sp_cost']:.4f}, "
                       f"Completion: ${self.ai.e_stats['sc_cost']:.4f})"
-                      f"\n{self.log.ts()}{head}{bottom_left}{self.log.horizontal_mid * 80}")
+                      f"\n{self.log.ts()}{head}{self.log.bottom_left}{self.log.horizontal_mid * 80}")
