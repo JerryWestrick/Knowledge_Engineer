@@ -1,11 +1,4 @@
-reject: add a .wget local command to access web-pages
-done: a www_get(url='') function to have AI download web pages from internet.
-      In both of these the html download is with javascript off, this is nearly worthless...
-      I have heard of a new special library that is built to download webpages llms  is has fire in its name)
-Done: Make a functions and routines executable from both sides.  (Allowing for local side exec and ask_user ect)
 Todo: Add routine to update OpenAI_API_Costs.py
-
-
 Todo: The file create_new_process.py, creates the example process structure.
       But the code in the prompts needs to be updated by hand.
       A command "Make Default" is required that saves the structure and contents of a proces,

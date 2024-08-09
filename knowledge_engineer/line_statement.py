@@ -5,7 +5,7 @@ from .logger import Logger
 
 LineStatement_Grammar = r"""
     ?start: "." statement 
-        
+
     ?statement: role_statement
             | include_statement
             | text_block_statement
@@ -13,16 +13,16 @@ LineStatement_Grammar = r"""
             | llm_statement
             | clear_statement
             | cmd_statement
-            
+
     role_statement: role_name 
-    
+
     sl_role_statement: role_name rest_of_line
-    
+
     role_name: "system"     -> system
              | "user"        -> user
              | "assistant"   -> assistant
              | "function"    -> function
-        
+
     include_statement: "include" rest_of_line
 
     text_block_statement: "text_block" rest_of_line
@@ -32,17 +32,17 @@ LineStatement_Grammar = r"""
     cmd_statement: "cmd" rest_of_line
 
     clear_statement: "clear" rest_of_line
-    
+
     exec_statement:  "exec"
-    
+
     rest_of_line: ENDOFLINE
-    
+
     VAR.1: /[\w\d]+/ 
-    
+
     ENDOFLINE: /[^\n]+/
-    
+
     MEMORY_NAME: /[\w\d][\w\d\/]*/
-    
+
     %ignore " "
     """
 
@@ -155,8 +155,18 @@ class Compiler:
         # Logger.log('STEP', f"result: {result}")
 
         statements = []
+
         for result_line in result:
-            if result_line.startswith("."):
+            line_statement: bool = False
+            if result_line[0] == ".":
+                kword = result_line
+                if ' ' in result_line:
+                    kword, _ = result_line.split(' ', maxsplit=1)
+
+                if kword in ['.llm', '.clear', '.system', '.user', '.assistant', '.include', '.cmd', '.exec']:
+                    line_statement = True
+
+            if line_statement:
                 tree = self.parser.parse(result_line.strip())
                 statement = MyTransformer().transform(tree)
                 statements.append(statement)

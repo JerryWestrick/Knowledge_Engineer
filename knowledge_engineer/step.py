@@ -108,7 +108,7 @@ class Step:
 
         txt = f'{top_left}Step: {self.pname}:"{self.name}"'
         self.log.info(f"{txt}")
-        txt = f'│ Model: "{self.ai.model}", Temperature: {self.ai.temperature}, Max Tokens: {int(self.ai.max_tokens):,}'
+        txt = f'│ Model: "{self.ai.model}", Temperature: {self.ai.temperature}, Max Tokens: {int(self.ai.max_tokens):,} Company: {self.ai.llm_name}'
         if self.ai.response_format:
             txt += f', Response Format: "{self.ai.response_format["type"]}"'
         self.log.info(txt)
@@ -118,6 +118,9 @@ class Step:
             self.update_gui()
             ai_response = await self.ai.generate(self, messages, process_name=self.pname)
         except AIException as err:
+            err_msg = f'Step: {self.pname}:"{self.name}" ai.generate failed: {err}'
+            self.log.error(err_msg, err)
+        except Exception as err:
             err_msg = f'Step: {self.pname}:"{self.name}" ai.generate failed: {err}'
             self.log.error(err_msg, err)
 

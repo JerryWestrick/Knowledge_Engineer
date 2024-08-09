@@ -14,8 +14,7 @@ from anthropic import AsyncAnthropic
 
 from dotenv import load_dotenv
 from httpx import ReadTimeout
-from mistralai.async_client import MistralAsyncClient
-from mistralai.models.chat_completion import ChatMessage
+from mistralai import Mistral as AsyncMistral
 from openai import AsyncOpenAI
 from rich.panel import Panel
 from rich.text import Text
@@ -421,7 +420,7 @@ class AI:
     }
 
     @abstractmethod
-    def make_msg(self, msg: dict[str, str]) -> dict[str, str] | ChatMessage:
+    def make_msg(self, msg: dict[str, str]) -> dict[str, str]:
         pass
 
     async def generate(self, step, user_messages: list[dict[str, str]], process_name: str):
@@ -436,7 +435,7 @@ class AI:
 
             elif self.llm_name.lower() == 'mistral':
                 api_key = os.getenv('MISTRAL_API_KEY')
-                self.client = MistralAsyncClient(api_key=api_key)
+                self.client = AsyncMistral(api_key=api_key)
 
             elif self.llm_name.lower() == 'anthropic':
                 api_key = os.getenv('ANTHROPIC_API_KEY')
@@ -538,7 +537,7 @@ class OpenAI(AI):
     def function_role(self) -> str:
         return 'function'
 
-    def make_msg(self, msg: dict[str, str]) -> dict[str, str] | ChatMessage:
+    def make_msg(self, msg: dict[str, str]) -> dict[str, str]:
         return msg
 
     async def chat(self, messages: list[dict[str, str]], step, process_name):
@@ -636,8 +635,8 @@ class Mistral(AI):
     # def function_result(self, name: str, content: str, tool_id: str):
     #     return {'role': "tool", "name": name, 'content': content, 'tool_call_id': tool_id}
 
-    def make_msg(self, msg: dict[str, str]) -> dict[str, str] | ChatMessage:
-        return ChatMessage(**msg)
+    def make_msg(self, msg: dict[str, str]) -> dict[str, str]:
+        return msg
 
     async def chat(self, messages: list[dict[str, str]], step, process_name):
         if self.mistral_tools is None:
@@ -649,7 +648,7 @@ class Mistral(AI):
 
             # Call Mistral
             try:
-                response = await self.client.chat(
+                response = await self.client.chat.complete_async(
                     model=self.model,
                     messages=messages,
                     tools=self.mistral_tools,
@@ -676,7 +675,7 @@ class Mistral(AI):
                     self.log.ai_tool_call(0, function_name, function_args)
                     rtn = self.available_functions[function_name]
                     new_msg = await rtn(self, **function_args, process_name=process_name)
-                    self.messages.append(ChatMessage(**new_msg))
+                    self.messages.append(new_msg)
                     self.log.ret_msg(0, new_msg)
                 repeat = True
             else:
@@ -685,7 +684,7 @@ class Mistral(AI):
                 if text and text.lower().endswith("if you want to proceed?"):
                     repeat = True
                     msg = {'role': 'user', 'content': 'Proceed.'}
-                    self.messages.append(ChatMessage(**msg))
+                    self.messages.append(msg)
                     self.log.umsg(step, msg)
 
             # Gather Answer
@@ -714,7 +713,7 @@ class Anthropic(AI):
     # def function_result(self, name: str, content: str):
     #     return {"role": "user", "content": [{'type': "tool_result", "tool_use_id": tool_id, "content": content}]}
     #
-    def make_msg(self, msg: dict[str, str]) -> dict[str, str] | ChatMessage:
+    def make_msg(self, msg: dict[str, str]) -> dict[str, str]:
         return msg
 
     async def chat(self, messages: list[dict[str, str]], step, process_name):
@@ -827,7 +826,7 @@ class Ollama(AI):
     def function_role(self) -> str:
         return 'tool_result'
 
-    def make_msg(self, msg: dict[str, str]) -> dict[str, str] | ChatMessage:
+    def make_msg(self, msg: dict[str, str]) -> dict[str, str]:
         return msg
 
     async def chat(self, messages: list[dict[str, str]], step, process_name):
@@ -982,7 +981,7 @@ class GroqAI(AI):
     # def function_result(self, name: str, content: str):
     #     return {"role": "user", "content": [{'type': "tool_result", "tool_use_id": tool_id, "content": content}]}
     #
-    def make_msg(self, msg: dict[str, str]) -> dict[str, str] | ChatMessage:
+    def make_msg(self, msg: dict[str, str]) -> dict[str, str]:
         return msg
 
     async def chat(self, messages: list[dict[str, str]], step, process_name):
