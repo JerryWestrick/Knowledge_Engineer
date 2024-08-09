@@ -108,7 +108,7 @@ class Step:
 
         txt = f'{top_left}Step: {self.pname}:"{self.name}"'
         self.log.info(f"{txt}")
-        txt = f'│ Model: "{self.ai.model}", Temperature: {self.ai.temperature}, Max Tokens: {int(self.ai.max_tokens):,} Company: {self.ai.llm_name}'
+        txt = f'{self.log.vertical_mid} Model: "{self.ai.model}", Temperature: {self.ai.temperature}, Max Tokens: {int(self.ai.max_tokens):,} Company: {self.ai.llm_name}'
         if self.ai.response_format:
             txt += f', Response Format: "{self.ai.response_format["type"]}"'
         self.log.info(txt)
@@ -127,7 +127,7 @@ class Step:
             # Write log file
             log_dir: str = os.getenv('KE_PROC_DIR_LOGS')
             full_path: str = f"{log_dir}/{self.prompt_name} log.md"
-            self.log.info(f'│ Writing log "{full_path}"')
+            self.log.info(f'{self.log.vertical_mid} Writing log "{full_path}"')
             self.memory[full_path] = f"{self.ai.answer}\nError:{err_msg}"
 
             raise err
@@ -137,7 +137,7 @@ class Step:
         # Write log file if required...
         log_dir: str = os.getenv('KE_PROC_DIR_LOGS')
         full_path: str = f"{log_dir}/{self.prompt_name} log.md"
-        self.log.info(f'│ Writing log "{full_path}"')
+        self.log.info(f'{self.log.vertical_mid} Writing log "{full_path}"')
         self.memory[full_path] = self.ai.answer
 
         total_tokens = (int(self.ai.e_stats['prompt_tokens']) + int(self.ai.e_stats['completion_tokens']))
@@ -150,12 +150,12 @@ class Step:
         self.ai.e_stats['elapsed_time'] = time.time() - start_time
         mins, secs = divmod(self.ai.e_stats['elapsed_time'], 60)
 
-        self.log.info(f"│ Elapsed: {int(mins)}m {secs:.2f}s Token Usage: "
+        self.log.info(f"{self.log.vertical_mid} Elapsed: {int(mins)}m {secs:.2f}s Token Usage: "
                       f"Total: [{wcolor}]{total_tokens:,}[/] ("
                       f"Prompt: {int(self.ai.e_stats['prompt_tokens']):,}, "
                       f"Completion: {int(self.ai.e_stats['completion_tokens']):,})"
                       f"\n{self.log.ts()}{head}"
-                      f"│ Costs:: Total: [green]${self.ai.e_stats['s_total']:.2f}[/] "
+                      f"{self.log.vertical_mid} Costs:: Total: [green]${self.ai.e_stats['s_total']:.2f}[/] "
                       f"(Prompt: ${self.ai.e_stats['sp_cost']:.4f}, "
                       f"Completion: ${self.ai.e_stats['sc_cost']:.4f})"
-                      f"\n{self.log.ts()}{head}{bottom_left}{'─' * 80}")
+                      f"\n{self.log.ts()}{head}{bottom_left}{self.log.horizontal_mid * 80}")

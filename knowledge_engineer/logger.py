@@ -2,16 +2,19 @@ import json
 import weakref
 from typing import Dict, Optional
 from rich.console import Console
+import platform
 
 class Logger:
     _instances = weakref.WeakSet()
     _console: Optional[Console] = None
     _log_file: Optional[Console] = None
 
-    top_left = '╭──'
-    top_right = '─╮'
-    bottom_left = '╰──'
-    bottom_right = '──╯'
+    top_left = '╭'
+    top_right = '╮'
+    bottom_left = '╰'
+    bottom_right = '╯'
+    vertical_mid = '│'
+    horizontal_mid = '─'
 
     def __init__(self, namespace: str, debug: bool = True):
         self.namespace = namespace
@@ -19,6 +22,15 @@ class Logger:
         self._instances.add(self)
         if Logger._console is None:
             Logger._console = Console()
+
+        if platform.system() == "Windows":
+            self.top_left = '+'
+            self.top_right = '+'
+            self.bottom_left = '+'
+            self.bottom_right = '+'
+            self.vertical_mid = '|'
+            self.horizontal_mid = '-'
+
 
     @classmethod
     def set_log_file(cls, log_file_name: str) -> None:
@@ -37,16 +49,16 @@ class Logger:
         return datetime.now().strftime("[%H:%M:%S.%f]")[:-3] + "]"
 
     def _format_step(self) -> str:
-        return f"[green]{self.namespace:>10}::[/][white]│ [/]"
+        return f"[green]{self.namespace:>10}::[/][white]{self.vertical_mid} [/]"
 
     def _format_head(self) -> str:
-        return f"{self._format_step()}[green]│ [/]"
+        return f"{self._format_step()}[green]{self.vertical_mid} [/]"
 
     def start_step(self, step):
-        self.print(f"{self.ts()}{self._format_step()}[green]{self.top_left}{'─' * 80}[/]")
+        self.print(f"{self.ts()}{self._format_step()}[green]{self.top_left}{self.horizontal_mid * 80}[/]")
 
     def stop_step(self, step):
-        self.print(f"{self.ts()}{self._format_step()}[green]{self.bottom_left}{'─' * 80}[/]")
+        self.print(f"{self.ts()}{self._format_step()}[green]{self.bottom_left}{self.horizontal_mid * 80}[/]")
 
     def umsg(self, step, msg: dict):
         color = 'medium_orchid'
