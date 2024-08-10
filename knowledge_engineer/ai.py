@@ -130,6 +130,7 @@ class AI:
     async def get_webpage_content(self, url: str) -> str:
         # Command to fetch the content and convert it to text
         command = f"wget2 --content-on-error -O - {url} | html2text"
+        # .\wget2.exe - O - "https://openai.com/api/pricing/" | html2text.exe
 
         # Create a subprocess
         process = await asyncio.create_subprocess_shell(

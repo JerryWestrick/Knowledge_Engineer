@@ -7,7 +7,7 @@ knowledge_engineer = ["*.md"]
 
 [project]
 name = "knowledge_engineer"
-version = "0.7.1"
+version = "0.7.3"
 authors = [
     { name = "Jerry Westrick", email = "jerry@westrick.com" },
 ]

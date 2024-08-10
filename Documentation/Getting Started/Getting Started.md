@@ -10,6 +10,12 @@ source .venv/bin/activate
 pip install knowledge_engineer
 
 ```
+You will need wget2...
+
+```shell
+sudo apt install wget2
+```
+
 
 
 ## Installation Dos / Windows
@@ -22,6 +28,21 @@ python3 -m venv .venv
 
 pip install knowledge_engineer
 ```
+You will need wget2
+
+Got to https://gitlab.com/gnuwget/wget2/-/releases
+Download wget2.exe 
+
+```shell
+ mkdir c:\Users\Jerry\AppData\Local\wget2
+ move wget2.exe c:\Users\Jerry\AppData\Local\wget2
+```
+
+And then add 'c:\Users\Jerry\AppData\Local\wget2' to your PATH environment variable.
+
+(use your username not 'Jerry')
+
+Logout and Log back in
 
 
 ### My first Project
