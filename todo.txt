@@ -19,3 +19,7 @@ Todo: Have problem with macro replacement.
 
 Todo: Documentation for macros
 
+Todo: Error in read file, due to filename interpretation:
+      .user Read the current Price List from 'Info/LISTA DE PRECIOS EPICURE 2024.pdf'
+      Error reading utf-8 from pdf file...  It is not UTF-8 and not to be sent line by line
+

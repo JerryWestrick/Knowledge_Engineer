@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import glob
 import json
+import re
 import shutil
 import time
 from json import JSONDecodeError
@@ -10,6 +11,7 @@ from pathlib import Path
 import traceback
 
 from ansi2html import Ansi2HTMLConverter
+from rich.console import Console
 from rich.traceback import install
 
 from dotenv import load_dotenv
@@ -28,7 +30,7 @@ log = Logger(namespace="ke", debug=True)
 memory = DB()
 
 
-async def execute_process(process_name: str, step_glob: str):
+async def execute_process(process_name: str, step_glob: str, debug: bool = False):
     if step_glob == '':
         step_glob = "*"
 
@@ -49,7 +51,7 @@ async def execute_process(process_name: str, step_glob: str):
             log.info(f'Skipping step {sname}')
         else:
             log.info(f'Execute {process_name}({step_no}): "{sname}"')
-            step = await execute_step(process_name, sname)
+            step = await execute_step(process_name, sname, debug=debug)
             # await step.run(process_name)
             for k, v in step.ai.e_stats.items():
                 e_stats[k] = e_stats.get(k, 0.0) + v
@@ -94,8 +96,8 @@ def main():
     process_management_group = parser.add_argument_group('Process Management')
     process_management_group.add_argument("-c", "--create", metavar="dir", type=str,
                                           help="Create a new process in the specified directory")
-    # process_management_group.add_argument("-l", "--list", action='store_true',
-    #                                       help="List all steps in the current process")
+    process_management_group.add_argument("--clean", action='store_true',
+                                          help="Delete all '.~01~.' backup files in all subdirectories")
     execution_control_group = parser.add_argument_group('Execution Control')
     # execution_control_group.add_argument("-e", "--exec", metavar="exec", type=str,
     #                                      help="Execute one or more steps in the current process matched by glob")
@@ -175,7 +177,27 @@ def main():
             version_str += f"{k}: {v}\n"
         log.info(f" {version_str}")
 
-    if args.models or args.functions or args.version or args.macros:
+    if args.clean:
+        console = Console()
+        pattern = r"\.~\d{2}~\."
+        regex = re.compile(pattern)
+
+        matched_files = []
+
+        for root, dirs, files in os.walk("."):
+            for a_file in files:
+                if regex.search(a_file):
+                    matched_files.append(os.path.join(root, a_file))
+        console.print(f"Files containing '{pattern}' pattern:")
+        for file in matched_files:
+            console.print(f"Deleting {file}...", end=" ")
+            try:
+                os.remove(file)
+                console.print(f"Done")
+            except Exception as e:
+                console.print(f"Failed: {e}")
+
+    if args.models or args.functions or args.version or args.macros or args.clean:
         return
 
     if args.steps:
@@ -194,7 +216,7 @@ def main():
     asyncio.run(run_ke(args))
 
 
-async def execute_step(proc_name: str, step_name: str) -> Step:
+async def execute_step(proc_name: str, step_name: str, debug: bool = False) -> Step:
     prompt_dir = os.getenv('KE_PROC_DIR_PROMPTS')
     log_dir = os.getenv('KE_PROC_DIR_LOGS')
     if step_name.startswith(prompt_dir):
@@ -248,6 +270,7 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
 
     step_parameters['prompt_name'] = Path(prompt_name).stem
     step_parameters['name'] = prompt_name[:-5]
+    step_parameters['debug'] = debug
 
     try:
         step = Step(**step_parameters)
@@ -286,7 +309,11 @@ async def execute_step(proc_name: str, step_name: str) -> Step:
     log.set_log_file(log_file_name)
     log.info(f"Logging to: {log_file_name}")
 
-    await step.run(proc_name, messages=messages)
+    try:
+        await step.run(proc_name, messages=messages)
+    except Exception as err:
+        convert_log_to_html(log_file_name, f"{log_file_name[:-4]}.html")
+        raise err
 
     convert_log_to_html(log_file_name, f"{log_file_name[:-4]}.html")
     return step
@@ -341,11 +368,21 @@ async def run_ke(args: argparse.Namespace):
 
     try:
         if args.exec:
-            await execute_process(proc_name, args.exec)
+            with open('Logs/ai_log.json', 'w') as file:
+                file.write(f"[\n")
+
+            await execute_process(proc_name, args.exec, debug=args.debug)
+
+            with open('Logs/ai_log.json', 'a') as file:
+                file.write(f"]")
+
             return
 
     except Exception as err:
         if args.debug:
+            with open('Logs/ai_log.json', 'a') as file:
+                file.write(f"]")
+
             tb_str = traceback.format_exc()
             from rich import print
             print(tb_str)  # use rich print function to pretty print the traceback

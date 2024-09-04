@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import platform
+import pprint
 import subprocess
 import sys
 from abc import abstractmethod
@@ -14,16 +15,18 @@ from anthropic import AsyncAnthropic
 
 from dotenv import load_dotenv
 from httpx import ReadTimeout
+# from litellm import max_tokens
 from mistralai import Mistral as AsyncMistral
 from openai import AsyncOpenAI
 from rich.panel import Panel
 from rich.text import Text
-from rich.console import Console
+# from rich.console import Console
 from rich import print
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.key_binding import KeyBindings
+# from sqlalchemy import false
 
 from .AI_API_Costs import AI_API_Costs
 from .db import DB
@@ -56,12 +59,28 @@ class AIException(Exception):
 
 class AI:
     log = Logger(namespace='AI', debug=True)
-    log_a = Logger(namespace="Assistant", debug=True)
+
     memory = DB()
+
+    ai_log_filename: str = 'Logs/ai_log.json'
+
+    def log_ai(self, txt: str, obj ):
+        if type(obj) is str:
+            obj = json.loads(obj)
+
+        t = {"Action": txt, "Object": obj }
+        try:
+            t_str = json.dumps(t, indent=4, sort_keys=True, default=str)
+
+            with open(self.ai_log_filename, 'a') as file:
+                file.write(f"{t_str},\n")
+        except Exception as e:
+            print(f"An error occurred while appending text to the file: {e}")
+
 
     def __init__(self, llm_name: str, model: str = "gpt-3.5-turbo-1106",
                  temperature: float = 0, max_tokens: int = 4000,
-                 mode: str = 'complete', response_format=None):
+                 mode: str = 'complete', response_format=None, debug: bool = False):
         self.answer: str = ''
         self.llm_name: str = llm_name
         self.temperature: float = temperature
@@ -82,6 +101,7 @@ class AI:
         }
         self.db: Database | None = None
         self.client = None
+        self.debug: bool = debug
 
     @abstractmethod
     def function_role(self) -> str:
@@ -483,8 +503,11 @@ class AI:
                 msgs = []
                 for msg in self.messages:
                     # user is never first msg so edge case msg(role) and msgs empty cannot happen
-                    if msg['role'] == 'user' and msgs[-1]['role'] == 'user':
-                        msgs[-1]['content'] = msgs[-1]['content'] + "\n" + msg['content']
+                    if msgs:
+                        if msg['role'] == 'user' and msgs[-1]['role'] == 'user':
+                            msgs[-1]['content'] = msgs[-1]['content'] + "\n" + msg['content']
+                        else:
+                            msgs.append(msg)
                     else:
                         msgs.append(msg)
                 self.messages = msgs
@@ -528,9 +551,10 @@ class OpenAI(AI):
 
     def __init__(self, llm_name: str, model: str = "gpt-3.5-turbo-1106",
                  temperature: float = 0, max_tokens: int = 4000,
-                 mode: str = 'complete', response_format=None):
+                 mode: str = 'complete', response_format=None, debug:bool = False):
         super().__init__(llm_name, model, temperature, max_tokens, mode, response_format)
         self.tools = None
+        self.debug = debug
         # additional initialization goes here
 
     # Add or override methods for the AI_OpenAI class as required
@@ -550,6 +574,11 @@ class OpenAI(AI):
         repeat = True
         while repeat:
             try:
+                if self.debug :
+                    self.log_ai("Call OpenAI",
+                        {"model": self.model, "messages":messages, "tools":self.mistral_tools, "tool_choice":"auto",}
+                    )
+
                 response = await self.client.chat.completions.create(
                     messages=messages,
                     model=self.model,
@@ -562,7 +591,11 @@ class OpenAI(AI):
                 self.log.error(err_msg, err)
                 raise err
 
+            if self.debug:
+                self.log_ai("OpenAI Response", response)
+
             repeat = False
+
             msg = response.choices[0].message
             finish_reason = response.choices[0].finish_reason
             content = response.choices[0].message.content
@@ -587,7 +620,13 @@ class OpenAI(AI):
                 for call in msg.tool_calls:
                     function_call = call.function
                     function_name = function_call.name
-                    function_args = json.loads(function_call.arguments)
+                    try:
+                        function_args = json.loads(function_call.arguments)
+                    except Exception as err:
+                        err_msg = make_error_msg(err)
+                        self.log.error(f"Function call arguments are not valid json, {err_msg}")
+                        raise err
+
                     # response_message['function_call'] = {'name': call.name, 'arguments': call.arguments}
                     self.log.ai_tool_call(0, function_name, function_args)  # Display with last message
                     try:
@@ -623,10 +662,11 @@ class Mistral(AI):
 
     def __init__(self, llm_name: str, model: str = "gpt-3.5-turbo-1106",
                  temperature: float = 0, max_tokens: int = 4000,
-                 mode: str = 'complete', response_format=None):
+                 mode: str = 'complete', response_format=None, debug:bool = False):
         super().__init__(llm_name, model, temperature, max_tokens, mode, response_format)
         # additional initialization goes here
         self.mistral_tools = None
+        self.debug = debug
 
     # Add or override methods for the AI_OpenAI class as required
 
@@ -649,6 +689,10 @@ class Mistral(AI):
 
             # Call Mistral
             try:
+                if self.debug :
+                    self.log_ai("Call Mistral",
+                        {"model": self.model, "messages":messages, "tools":self.mistral_tools, "tool_choice":"auto",}
+                    )
                 response = await self.client.chat.complete_async(
                     model=self.model,
                     messages=messages,
@@ -661,21 +705,27 @@ class Mistral(AI):
                 response = {'role': 'system', 'error': err_msg}
                 raise err
 
+            if self.debug:
+                self.log_ai("Mistral Response", response.json())
+
             response_message = response.choices[0].message
-            self.messages.append(response_message)
+            # self.messages.append(response_message)
             function_name = None
             function_args = None
             text = response_message.content
             finish_reason = response.choices[0].finish_reason
 
             if finish_reason == 'tool_calls':
+                t = json.loads(response_message.json())
+                self.messages.append(t)
                 for tool_call in response_message.tool_calls:
                     function_call = tool_call.function
                     function_name = function_call.name
                     function_args = json.loads(function_call.arguments)
                     self.log.ai_tool_call(0, function_name, function_args)
                     rtn = self.available_functions[function_name]
-                    new_msg = await rtn(self, **function_args, process_name=process_name)
+                    rtn_msg = await rtn(self, **function_args, process_name=process_name)
+                    new_msg = {'role': 'tool', 'name': function_name, 'content': rtn_msg['content'], 'tool_call_id': tool_call.id,}
                     self.messages.append(new_msg)
                     self.log.ret_msg(0, new_msg)
                 repeat = True
@@ -701,10 +751,11 @@ class Anthropic(AI):
 
     def __init__(self, llm_name: str, model: str = "gpt-3.5-turbo-1106",
                  temperature: float = 0, max_tokens: int = 4000,
-                 mode: str = 'complete', response_format=None):
+                 mode: str = 'complete', response_format=None, debug:bool = False):
         super().__init__(llm_name, model, temperature, max_tokens, mode, response_format)
         # additional initialization goes here
         self.anthropic_tools = None
+        self.debug = debug
 
     # Add or override methods for the AI_OpenAI class as required
 
@@ -740,6 +791,11 @@ class Anthropic(AI):
 
             # Call Anthropic
             try:
+                if self.debug :
+                    self.log_ai("Call Anthropic",
+                        {"model": self.model, "messages":messages, "tools":self.mistral_tools, "tool_choice":"auto",}
+                    )
+
                 response = await self.client.messages.create(
                     model=self.model,
                     system=system_msg,
@@ -775,6 +831,9 @@ class Anthropic(AI):
                 raise err
 
             # Build AI response and add it to messages
+            if self.debug:
+                self.log_ai("Anthropic Response", response)
+
             content_blocks = []
             stop_reason = response.stop_reason
             for block in response.content:
@@ -817,10 +876,11 @@ class Ollama(AI):
 
     def __init__(self, llm_name: str, model: str = "llama3",
                  temperature: float = 0, max_tokens: int = 4000,
-                 mode: str = 'complete', response_format=None):
+                 mode: str = 'complete', response_format=None, debug: bool = False):
         super().__init__(llm_name, model, temperature, max_tokens, mode, response_format)
         # additional initialization goes here
         self.ollama_tools = None
+        self.debug = debug
 
     # Add or override methods for the AI_OpenAI class as required
 
@@ -858,6 +918,9 @@ class Ollama(AI):
             while repeat:
                 repeat = False
                 try:
+                    if self.debug:
+                        self.log_ai("Call Ollama", {'url': url_generate, 'json': data, 'headers': headers})
+
                     response = await client.post(url_generate, json=data, headers=headers)
                 except ReadTimeout as err:
                     self.log.error(f"Read Time Out Error while accessing Ollama.", err)
@@ -865,6 +928,9 @@ class Ollama(AI):
                 except Exception as err:
                     self.log.error(f"Error while accessing Ollama: {err.__cause__}", err)
                     raise err
+
+                if self.debug:
+                    self.log_ai("Ollama Response", response)
 
                 if response.status_code != 200:
                     err_msg = f"{response.status}::{text}"
@@ -897,10 +963,11 @@ class GroqAI(AI):
 
     def __init__(self, llm_name: str, model: str = "gpt-3.5-turbo-1106",
                  temperature: float = 0, max_tokens: int = 4000,
-                 mode: str = 'complete', response_format=None):
+                 mode: str = 'complete', response_format=None, debug: bool = False):
         super().__init__(llm_name, model, temperature, max_tokens, mode, response_format)
         # additional initialization goes here
         self.groq_tools = None
+        self.debug = debug
 
     # Add or override methods for the AI_OpenAI class as required
 
@@ -935,12 +1002,22 @@ class GroqAI(AI):
             repeat = False
             # Call Groq
             try:
+                if self.debug:
+                    self.log_ai("GroqAI Call",
+                                {"model": self.model,
+                                    "messages": self.messages,
+                                    "tools": self.groq_tools,
+                                    "tool_choice": "auto",
+                                    "max_tokens": self.max_tokens,
+                                    }
+                                )
+
                 response = await self.client.chat.completions.create(
                     model=self.model,
                     messages=messages,
                     tools=self.groq_tools,
                     tool_choice="auto",
-                    max_tokens=self.max_tokens,
+                    max_tokens=self.max_tokens
                 )
 
             except Exception as err:
@@ -948,6 +1025,9 @@ class GroqAI(AI):
                 self.log.error(err_msg, err)
                 response = {'role': 'system', 'error': err_msg}
                 raise AIException(err_msg)
+
+            if self.debug:
+                self.log_ai("GroqAI Response", response)
 
             # Build AI response and add it to messages
             stop_reason = response.choices[0].finish_reason

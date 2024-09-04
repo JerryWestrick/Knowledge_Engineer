@@ -20,8 +20,10 @@ class Step:
                  model: str = 'gpt-4o-mini',
                  temperature: int = 0,
                  max_tokens: int = 4000,
-                 response_format=None
+                 response_format=None,
+                 debug:bool = False
                  ):
+        self.debug = debug
         self.name: str = name
         self.prompt_name: str | None = prompt_name
         self.macros: dict[str, str] = macros
@@ -40,35 +42,40 @@ class Step:
                                  model=model,
                                  max_tokens=max_tokens,
                                  temperature=temperature,
-                                 response_format=rf
+                                 response_format=rf,
+                                 debug=self.debug
                                  )
         elif llm_name == 'mistral':
             self.ai: AI = Mistral(llm_name=llm_name,
                                   model=model,
                                   max_tokens=max_tokens,
                                   temperature=temperature,
-                                  response_format=rf
+                                  response_format=rf,
+                                 debug=self.debug
                                   )
         elif llm_name == 'anthropic':
             self.ai: AI = Anthropic(llm_name=llm_name,
                                     model=model,
                                     max_tokens=max_tokens,
                                     temperature=temperature,
-                                    response_format=rf
+                                    response_format=rf,
+                                 debug=self.debug
                                     )
         elif llm_name == 'ollama':
             self.ai: AI = Ollama(llm_name=llm_name,
                                  model=model,
                                  max_tokens=max_tokens,
                                  temperature=temperature,
-                                 response_format=rf
+                                 response_format=rf,
+                                 debug=self.debug
                                  )
         elif llm_name == 'groq':
             self.ai: AI = GroqAI(llm_name=llm_name,
                                  model=model,
                                  max_tokens=max_tokens,
                                  temperature=temperature,
-                                 response_format=rf
+                                 response_format=rf,
+                                 debug=self.debug
                                  )
         else:
             raise ValueError(f"Unknown LLM: {llm_name}")

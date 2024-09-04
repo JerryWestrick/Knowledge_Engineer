@@ -117,6 +117,12 @@ class Logger:
         txt = result['content'].replace('\n', '\\n')
         self.print(f"{self.ts()}{self._format_head()}[medium_orchid]{'return':>14}[/] [green]{result['name']}({id}):: {txt}[/]")
 
+    def ai_log_call(self, parameters: Dict):
+        self.print(f"{self.ts()}{self._format_head()}[orange1]{'call log':>14}[/] [green]{parameters}[/]")
+
+    def ai_log_response(self, parameters: Dict):
+        self.print(f"{self.ts()}{self._format_head()}[orange1]{'call response':>14}[/] [green]{parameters}[/]")
+
     def error(self, msg: str, err: Optional[Exception] = None):
         trace_back_msg = self._format_traceback(err) if err else ''
         self.print(f"{self.ts()}[on red]{self.namespace:>10}[/on red]::{msg}{trace_back_msg}")

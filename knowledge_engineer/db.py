@@ -105,6 +105,17 @@ class DB:
             content = f.read()
         return content
 
+    def read_binary(self, key: str, process_name: str = ''):
+        full_path = self.path / key
+        if not full_path.is_file():
+            self.log.error(f"Invalid Memory Item.  \nPath not found: {full_path}", None)
+            raise KeyError(key)
+        with full_path.open("r") as f:
+            # read the file and return the contents
+            self.log.info(f"Reading>>{key}")
+            content = f.read()
+        return content
+
     def __getitem__(self, key: str) -> [dict[str, str]]:
         """Return the contents of the file with the given key."""
         lines = self.read(key).splitlines()
