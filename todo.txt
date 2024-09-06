@@ -23,3 +23,8 @@ Todo: Error in read file, due to filename interpretation:
       .user Read the current Price List from 'Info/LISTA DE PRECIOS EPICURE 2024.pdf'
       Error reading utf-8 from pdf file...  It is not UTF-8 and not to be sent line by line
 
+Fixed: Error in Mistral Function Calling...
+
+Fixed: the Logs/ai_log.json is fixed, instead of from Logs directory.  Additionally the constant is used in 4 places.
+
+Fixed: Add a --clean option to delete all backup files...

@@ -62,7 +62,7 @@ class AI:
 
     memory = DB()
 
-    ai_log_filename: str = 'Logs/ai_log.json'
+    ai_log_filename: str = None
 
     def log_ai(self, txt: str, obj ):
         if type(obj) is str:
@@ -73,7 +73,8 @@ class AI:
             t_str = json.dumps(t, indent=4, sort_keys=True, default=str)
 
             with open(self.ai_log_filename, 'a') as file:
-                file.write(f"{t_str},\n")
+                file.write(f",{t_str}\n")
+
         except Exception as e:
             print(f"An error occurred while appending text to the file: {e}")
 
@@ -572,12 +573,19 @@ class OpenAI(AI):
             for func in self.functions:
                 self.tools.append({'type': 'function', 'function': func})
         repeat = True
+        interaction_no = 0
         while repeat:
+            interaction_no += 1
             try:
-                if self.debug :
-                    self.log_ai("Call OpenAI",
-                        {"model": self.model, "messages":messages, "tools":self.mistral_tools, "tool_choice":"auto",}
-                    )
+                self.log_ai(f"Call {interaction_no} OpenAI",
+                    {
+                        "messages": messages,
+                        "model": self.model,
+                        "temperature": self.temperature,
+                        "tools": self.tools,
+                        "tool_choice": "auto",
+                        "response_format": self.response_format}
+                )
 
                 response = await self.client.chat.completions.create(
                     messages=messages,
@@ -591,8 +599,7 @@ class OpenAI(AI):
                 self.log.error(err_msg, err)
                 raise err
 
-            if self.debug:
-                self.log_ai("OpenAI Response", response)
+            self.log_ai(f"OpenAI {interaction_no} Response", response.json())
 
             repeat = False
 
@@ -684,15 +691,17 @@ class Mistral(AI):
             self.mistral_tools = [{"type": "function", "function": x} for x in self.functions]
 
         repeat = True
+        interaction_no = 0
         while repeat:
             repeat = False
+            interaction_no += 1
 
             # Call Mistral
             try:
-                if self.debug :
-                    self.log_ai("Call Mistral",
-                        {"model": self.model, "messages":messages, "tools":self.mistral_tools, "tool_choice":"auto",}
-                    )
+                self.log_ai(f"Call {interaction_no} Mistral",
+                    {"model": self.model, "messages":messages, "tools":self.mistral_tools, "tool_choice":"auto",}
+                )
+
                 response = await self.client.chat.complete_async(
                     model=self.model,
                     messages=messages,
@@ -705,8 +714,7 @@ class Mistral(AI):
                 response = {'role': 'system', 'error': err_msg}
                 raise err
 
-            if self.debug:
-                self.log_ai("Mistral Response", response.json())
+            self.log_ai(f"Mistral {interaction_no} Response", response.json())
 
             response_message = response.choices[0].message
             # self.messages.append(response_message)
@@ -786,15 +794,22 @@ class Anthropic(AI):
                 del msg['name']
 
         repeat = True
+        interaction_no = 0
         while repeat:
+            interaction_no += 1
             repeat = False
 
             # Call Anthropic
             try:
-                if self.debug :
-                    self.log_ai("Call Anthropic",
-                        {"model": self.model, "messages":messages, "tools":self.mistral_tools, "tool_choice":"auto",}
-                    )
+                self.log_ai(f"Call {interaction_no} Anthropic",
+                    {
+                        "model": self.model,
+                        "system": system_msg,
+                        "messages":messages,
+                        "tools":self.anthropic_tools,
+                        "tool_choice":{"type": "auto"},
+                        "max_tokens":self.max_tokens,}
+                            )
 
                 response = await self.client.messages.create(
                     model=self.model,
@@ -831,8 +846,7 @@ class Anthropic(AI):
                 raise err
 
             # Build AI response and add it to messages
-            if self.debug:
-                self.log_ai("Anthropic Response", response)
+            self.log_ai(f"Anthropic {interaction_no} Response", response.json())
 
             content_blocks = []
             stop_reason = response.stop_reason
@@ -914,12 +928,13 @@ class Ollama(AI):
         }
 
         repeat = True
+        interaction_no = 0
         async with httpx.AsyncClient(timeout=600.0) as client:
             while repeat:
                 repeat = False
+                interaction_no += 1
                 try:
-                    if self.debug:
-                        self.log_ai("Call Ollama", {'url': url_generate, 'json': data, 'headers': headers})
+                    self.log_ai(f"Call {interaction_no} Ollama", {'url': url_generate, 'json': data, 'headers': headers})
 
                     response = await client.post(url_generate, json=data, headers=headers)
                 except ReadTimeout as err:
@@ -929,8 +944,7 @@ class Ollama(AI):
                     self.log.error(f"Error while accessing Ollama: {err.__cause__}", err)
                     raise err
 
-                if self.debug:
-                    self.log_ai("Ollama Response", response)
+                self.log_ai(f"Ollama {interaction_no} Response", response)
 
                 if response.status_code != 200:
                     err_msg = f"{response.status}::{text}"
@@ -998,19 +1012,20 @@ class GroqAI(AI):
         #     system_msg = messages.pop(0)['content']
 
         repeat = True
+        interaction_no = 0
         while repeat:
+            interaction_no += 1
             repeat = False
             # Call Groq
             try:
-                if self.debug:
-                    self.log_ai("GroqAI Call",
-                                {"model": self.model,
-                                    "messages": self.messages,
-                                    "tools": self.groq_tools,
-                                    "tool_choice": "auto",
-                                    "max_tokens": self.max_tokens,
-                                    }
-                                )
+                self.log_ai(f"GroqAI {interaction_no} Call",
+                            {"model": self.model,
+                                "messages": self.messages,
+                                "tools": self.groq_tools,
+                                "tool_choice": "auto",
+                                "max_tokens": self.max_tokens,
+                                }
+                            )
 
                 response = await self.client.chat.completions.create(
                     model=self.model,
@@ -1026,15 +1041,23 @@ class GroqAI(AI):
                 response = {'role': 'system', 'error': err_msg}
                 raise AIException(err_msg)
 
-            if self.debug:
-                self.log_ai("GroqAI Response", response)
+            self.log_ai(f"GroqAI {interaction_no} Response", response.json())
 
             # Build AI response and add it to messages
             stop_reason = response.choices[0].finish_reason
             message = response.choices[0].message
-            self.messages.append(message)
 
             if message.tool_calls:
+                tool_calls = [{"id": tool_call.id,
+                               "function": {"name": tool_call.function.name,"arguments": tool_call.function.arguments,},
+                               "type": tool_call.type,
+                                } for tool_call in message.tool_calls]
+
+                self.messages.append({
+                    "role": "assistant",
+                    "tool_calls": tool_calls,
+                })
+
                 for tool_call in message.tool_calls:
                     function_name = tool_call.function.name
                     call_args = json.loads(tool_call.function.arguments)
@@ -1042,8 +1065,11 @@ class GroqAI(AI):
                     self.log.ai_tool_call(0, function_name, call_args)
                     rtn = self.available_functions[function_name]
                     result = await rtn(self, **call_args, process_name=process_name)
-                    new_msg = {"role": "tool", "tool_call_id": call_id, "name": function_name,
-                               "content": str(result['content'])}
+                    new_msg = {"role": "tool",
+                               "tool_call_id": tool_call.id,
+                               "name": tool_call.function.name,
+                               "content": str(result['content'])
+                               }
                     self.messages.append(new_msg)
                     ret_msg = {""}
                     self.log.ret_msg(0, result)
@@ -1052,6 +1078,7 @@ class GroqAI(AI):
                 content = {"type": "text", "text": message.content, "role": "Assistant"}
                 self.log.ai_msg(step, message.content, stop_reason)
                 self.answer += f"\n{message.content}"
+                self.messages.append(message)
 
             # Gather Answer
             self.e_stats['prompt_tokens'] = \

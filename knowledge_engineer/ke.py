@@ -30,7 +30,7 @@ log = Logger(namespace="ke", debug=True)
 memory = DB()
 
 
-async def execute_process(process_name: str, step_glob: str, debug: bool = False):
+async def execute_process(process_name: str, step_glob: str):
     if step_glob == '':
         step_glob = "*"
 
@@ -51,7 +51,7 @@ async def execute_process(process_name: str, step_glob: str, debug: bool = False
             log.info(f'Skipping step {sname}')
         else:
             log.info(f'Execute {process_name}({step_no}): "{sname}"')
-            step = await execute_step(process_name, sname, debug=debug)
+            step = await execute_step(process_name, sname)
             # await step.run(process_name)
             for k, v in step.ai.e_stats.items():
                 e_stats[k] = e_stats.get(k, 0.0) + v
@@ -118,9 +118,6 @@ def main():
 
     information_group.add_argument("--macros", action='store_true',
                                    help="Print the values of the Macro Storage")
-
-    debug_group = parser.add_argument_group('debug')
-    debug_group.add_argument("-d", "--debug", action='store_true')
 
     # Parse the arguments (This line is necessary for the actual argument parsing, but not for generating the help text)
     # args = parser.parse_args()
@@ -216,7 +213,7 @@ def main():
     asyncio.run(run_ke(args))
 
 
-async def execute_step(proc_name: str, step_name: str, debug: bool = False) -> Step:
+async def execute_step(proc_name: str, step_name: str) -> Step:
     prompt_dir = os.getenv('KE_PROC_DIR_PROMPTS')
     log_dir = os.getenv('KE_PROC_DIR_LOGS')
     if step_name.startswith(prompt_dir):
@@ -270,7 +267,6 @@ async def execute_step(proc_name: str, step_name: str, debug: bool = False) -> S
 
     step_parameters['prompt_name'] = Path(prompt_name).stem
     step_parameters['name'] = prompt_name[:-5]
-    step_parameters['debug'] = debug
 
     try:
         step = Step(**step_parameters)
@@ -309,13 +305,26 @@ async def execute_step(proc_name: str, step_name: str, debug: bool = False) -> S
     log.set_log_file(log_file_name)
     log.info(f"Logging to: {log_file_name}")
 
+    # Start AI Loging
+    ai_log_filename = f"{log_dir}/{proc_name}-{name}_ailog.json"
+    with open(ai_log_filename, 'w') as file:
+        start_msg = {"content": "Begin of Step " + step_name, "role": "ailog"}
+        file.write(f"[{json.dumps(start_msg)}\n")
+
+    AI.ai_log_filename = ai_log_filename
+    log.info(f"AI Communication Logging to: {ai_log_filename}")
+
     try:
         await step.run(proc_name, messages=messages)
     except Exception as err:
         convert_log_to_html(log_file_name, f"{log_file_name[:-4]}.html")
+        with open(ai_log_filename, 'a') as file:
+            file.write(f"]")
         raise err
 
     convert_log_to_html(log_file_name, f"{log_file_name[:-4]}.html")
+    with open(ai_log_filename, 'a') as file:
+        file.write(f"]")
     return step
 
 
@@ -368,24 +377,13 @@ async def run_ke(args: argparse.Namespace):
 
     try:
         if args.exec:
-            with open('Logs/ai_log.json', 'w') as file:
-                file.write(f"[\n")
-
-            await execute_process(proc_name, args.exec, debug=args.debug)
-
-            with open('Logs/ai_log.json', 'a') as file:
-                file.write(f"]")
-
+            await execute_process(proc_name, args.exec)
             return
 
     except Exception as err:
-        if args.debug:
-            with open('Logs/ai_log.json', 'a') as file:
-                file.write(f"]")
-
-            tb_str = traceback.format_exc()
-            from rich import print
-            print(tb_str)  # use rich print function to pretty print the traceback
+        tb_str = traceback.format_exc()
+        from rich import print
+        print(tb_str)  # use rich print function to pretty print the traceback
 
 
 if __name__ == "__main__":
